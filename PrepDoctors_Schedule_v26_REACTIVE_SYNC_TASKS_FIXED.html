@@ -797,17 +797,8 @@
 <button class="btn small" data-t="custom">Custom</button>
 </div>
 </div>
-<!-- View Scope & Filter -->
+<!-- Filter only - View Scope moved to task creation -->
 <div class="toolbar-group">
-<div class="select-wrap compact"><select id="viewScopeSelect" title="View Scope">
-<option value="all">All Scopes</option>
-<option value="individual">Individual</option>
-<option value="team">Team</option>
-<option value="department">Department</option>
-<option value="company">Company Wide</option>
-<option value="course">Course</option>
-<option value="location">Location</option>
-</select></div>
 <button class="btn small" id="toolbarFilterBtn" title="Filter Tasks">Filter</button>
 </div>
 <!-- Stats -->
@@ -1676,12 +1667,28 @@ function clearDirty(courseId){
   updateGenerateButtons();
 }
 function updateGenerateButtons(){
-  // Header "Generate All Courses"
-  $('#btnGenAll').disabled = Array.from(dirtySetFor(selectedYear)).filter(cid => ensureConfig(cid).enabled).length === 0;
-  // Course-level buttons
+  // Header "Generate All Courses" - enabled when there are courses with cycles to generate
+  const enabledCoursesWithCycles = getCourses().filter(c => {
+    const cfg = ensureConfig(c.id);
+    return cfg.enabled && cfg.cycleData && cfg.cycleData.length > 0;
+  });
+  const hasDirtyCourses = Array.from(dirtySetFor(selectedYear)).filter(cid => ensureConfig(cid).enabled).length > 0;
+  const genAllBtn = $('#btnGenAll');
+  if(genAllBtn){
+    genAllBtn.disabled = !hasDirtyCourses && enabledCoursesWithCycles.length === 0;
+    genAllBtn.title = enabledCoursesWithCycles.length === 0 ?
+      'No courses configured. Enable courses and add cycles first.' :
+      (hasDirtyCourses ? 'Generate tasks for modified courses' : 'Generate tasks for all enabled courses');
+  }
+  // Course-level buttons - enabled when course has cycles configured
   $$('#courseSections [data-act="generateCourse"]').forEach(btn=>{
     const cid = btn.getAttribute('data-cid');
-    btn.disabled = !dirtySetFor(selectedYear).has(cid);
+    const cfg = ensureConfig(cid);
+    const hasCycles = cfg.cycleData && cfg.cycleData.length > 0;
+    const isDirty = dirtySetFor(selectedYear).has(cid);
+    btn.disabled = !hasCycles;
+    btn.title = !hasCycles ? 'Add at least one cycle to enable generation' :
+      (isDirty ? 'Generate tasks (course has changes)' : 'Regenerate tasks for this course');
   });
 }
 
@@ -3047,7 +3054,8 @@ let viewMode = 'calendar'; // calendar | list | kanban
 let timeMode = 'month'; // day | week | month | quarter | ytd | 6m | 1y | custom
 let statsScope = 'view'; // 'view' | 'all'
 let customRange = { start:null, end:null };
-let currentViewScope = 'all'; // all | individual | team | department | company | course | location
+// View scope is now only used as task metadata, always show all tasks on calendar
+const currentViewScope = 'all';
 
 /* =========================================================
    View Sync + Asana-style motion (FLIP)
@@ -3282,11 +3290,7 @@ function renderCalendarGrid(){
       const ins = ev.instructors||[];
       if(!ins.some(x=>filt.instructors.includes(x))) return false;
     }
-    // View scope filter (same as List/Kanban)
-    if(currentViewScope !== 'all'){
-      const evScope = ev.viewScope || '';
-      if(evScope !== currentViewScope) return false;
-    }
+    // View scope is now just metadata shown on task card, not a filter
     return true;
   }
   function eventsOn(ds){
@@ -3373,6 +3377,16 @@ function renderCalendarGrid(){
       if(cardSet.showInstructors && (ev.instructors||[]).length){
         const names = (ev.instructors||[]).map(id=>Store.instructors.find(i=>i.id===id)?.name||id).join(', ');
         chips.push(`<div class="chip">${names}</div>`);
+      }
+      // Show view scope on task card when set
+      if(cardSet.showViewScope && ev.viewScope){
+        const scopeLabels = {individual:'Individual',team:'Team',department:'Department',company:'Company',course:'Course',location:'Location'};
+        chips.push(`<div class="chip" style="background:#E0F2FE;border-color:#7DD3FC;">${scopeLabels[ev.viewScope]||ev.viewScope}</div>`);
+      }
+      // Show status chip
+      if(cardSet.showStatus && ev.status){
+        const stt = statusByKey(ev.status);
+        chips.push(`<div class="chip" style="background:${stt.bg};border-color:${stt.bd};">${stt.label}</div>`);
       }
       if(ev.type==='Schedule') chips.push(`<div class="chip">Schedule</div>`);
 
@@ -3628,6 +3642,10 @@ function createQuickEvent(date){
 
   wrapAllSelects();
 
+  // Initialize view scope select
+  const evViewScopeSel = $('#evViewScope');
+  if(evViewScopeSel) evViewScopeSel.value = '';
+
   // Save handler: commit the new task only when user confirms
   if(saveBtn){
     saveBtn.onclick = ()=>{
@@ -3651,6 +3669,9 @@ function createQuickEvent(date){
       ev.conditional = $('#evConditionalChk').checked;
       ev.notes = $('#evNotes').value;
       ev.cycleIndex = $('#evCycle').value ? (+$('#evCycle').value) : undefined;
+      // Save view scope
+      const viewScopeSel = $('#evViewScope');
+      if(viewScopeSel) ev.viewScope = viewScopeSel.value || '';
 
       y.events.push(ev);
       scheduleAutosave();
@@ -3887,42 +3908,82 @@ const tag = (ev.generated && ev.genSource==='default') ? 'Default' : ((ev.genera
   const instrOpts = Store.instructors.map(i=>({value:i.id, label:i.name||i.email||i.id}));
   renderMultiSelect($('#evInstrMS'), instrOpts, (ev.instructors||[]), (selVals)=>{ ev.instructors = selVals; });
 
-  // Disable editing for schedule tasks on specific fields
-  if(ev.type==='Schedule'){
-    $('#evType').disabled = true; $('#evFormat').disabled=true; $('#evGenerated').disabled=true; $('#evStatus').disabled=true;
-  }else{
-    $('#evType').disabled = false; $('#evFormat').disabled=false; $('#evGenerated').disabled=false; $('#evStatus').disabled=false;
-  }
+  // Context-aware field states based on task type
+  const isScheduleItem = (ev.type==='Schedule');
+  const isGenerated = ev.generated && ev.genSource==='default';
+
+  // Schedule items: lock type, format, generated, but allow status changes
+  $('#evType').disabled = isScheduleItem;
+  $('#evFormat').disabled = isScheduleItem;
+  $('#evGenerated').disabled = isScheduleItem;
+  // Status is always editable
+  $('#evStatus').disabled = false;
+  // Date/time editable for non-generated items only
+  $('#evDate').disabled = isScheduleItem;
+  $('#evStart').disabled = isScheduleItem;
+  $('#evEnd').disabled = isScheduleItem;
+  // Title always editable
+  $('#evTitle').disabled = false;
+  // Course locked for generated items
+  $('#evCourse').disabled = isGenerated;
+
+  // Set view scope value
+  const evViewScopeSel = $('#evViewScope');
+  if(evViewScopeSel) evViewScopeSel.value = ev.viewScope || '';
 
   wrapAllSelects();
 
+  // Edit button - always available
   $('#evEdit').onclick = ()=>{
     $('#evView').classList.add('hidden');
     $('#evForm').classList.remove('hidden');
     $('#evSave').style.display = '';
   };
 
+  // Save with context-awareness
   $('#evSave').onclick = ()=>{
+    // Only update fields that are editable
     ev.title = $('#evTitle').value.trim()||'Untitled';
-    ev.date = $('#evDate').value;
-    ev.type = $('#evType').value; ev.startTime = $('#evStart').value || ''; ev.endTime = $('#evEnd').value || '';
-    ev.format = $('#evFormat').value || '';
-    ev.courseId = $('#evCourse').value; ev.courseName = courseLabel(ev.courseId);
+    if(!isScheduleItem){
+      ev.date = $('#evDate').value;
+      ev.startTime = $('#evStart').value || '';
+      ev.endTime = $('#evEnd').value || '';
+      ev.type = $('#evType').value;
+      ev.format = $('#evFormat').value || '';
+      const tagVal = $('#evGenerated').value;
+      ev.generated = (tagVal==='default' || tagVal==='one');
+      ev.genSource = tagVal;
+    }
+    if(!isGenerated){
+      ev.courseId = $('#evCourse').value;
+      ev.courseName = courseLabel(ev.courseId);
+    }
     ev.status = $('#evStatus').value;
-    const tagVal = $('#evGenerated').value;
-    ev.generated = (tagVal==='default' || tagVal==='one');
-    ev.genSource = tagVal;
     ev.conditional = $('#evConditionalChk').checked;
     ev.notes = $('#evNotes').value;
     ev.cycleIndex = $('#evCycle').value ? (+$('#evCycle').value) : undefined;
+    // Save view scope
+    const viewScopeSel = $('#evViewScope');
+    if(viewScopeSel) ev.viewScope = viewScopeSel.value || '';
     // audiences updated via MS callback
     // instructors updated via MS callback
     scheduleAutosave(); hideModal('eventModal'); refreshAllViews({animate:true}); showToast('Task updated');
   };
-  $('#evDelete').onclick = ()=>{
-    if(!confirm('Delete this task?')) return;
-    y.events = y.events.filter(e=>e.id!==ev.id); scheduleAutosave(); hideModal('eventModal'); refreshAllViews({animate:true}); showToast('Task deleted');
-  };
+
+  // Delete button - context-aware for Schedule items
+  const deleteBtn = $('#evDelete');
+  if(deleteBtn){
+    deleteBtn.disabled = isScheduleItem; // Can't delete schedule items directly, use Cycle Schedule
+    deleteBtn.title = isScheduleItem ? 'Schedule items must be deleted from Cycle Schedule' : 'Delete this task';
+    deleteBtn.onclick = ()=>{
+      if(isScheduleItem){
+        alert('Schedule items must be deleted from the Cycle Schedule modal. Go to Create Schedule → Course → View/Edit Schedule.');
+        return;
+      }
+      if(!confirm('Delete this task?')) return;
+      y.events = y.events.filter(e=>e.id!==ev.id); scheduleAutosave(); hideModal('eventModal'); refreshAllViews({animate:true}); showToast('Task deleted');
+    };
+  }
   showModal('eventModal');
   const tfb = $('#taskFieldOptionsBtn'); if(tfb){ tfb.onclick = ()=>{ renderEventSettings(); showModal('eventSettingsModal'); }; }
 }
@@ -7396,14 +7457,9 @@ $('#saveAppSettings').onclick = ()=>{
     return Store.appSettings.viewScopes || defaultViewScopes;
   }
 
-  /* --- Current view scope filter (uses global currentViewScope) --- */
-  const viewScopeSelect = document.getElementById('viewScopeSelect');
-  if (viewScopeSelect) {
-    viewScopeSelect.onchange = function() {
-      currentViewScope = this.value;
-      refreshAllViews({ animate: false });
-    };
-  }
+  /* --- View scope is now metadata only, not used for filtering --- */
+  // The viewScopeSelect dropdown has been removed from the calendar toolbar
+  // View scope is set during task creation and displayed on task cards
 
   /* --- Toolbar Filter Button --- */
   const toolbarFilterBtn = document.getElementById('toolbarFilterBtn');
@@ -7430,7 +7486,7 @@ $('#saveAppSettings').onclick = ()=>{
     return true;
   }
 
-  /* --- Patch filteredEventsInRange to use view scope filter --- */
+  /* --- Patch filteredEventsInRange (view scope is now just metadata, not a filter) --- */
   const _originalFilteredEventsInRange = window.filteredEventsInRange;
   window.filteredEventsInRange = function() {
     const y = yearData();
@@ -7455,11 +7511,7 @@ $('#saveAppSettings').onclick = ()=>{
         const ins = ev.instructors || [];
         if (!ins.some(x => cur.instructors.includes(x))) return false;
       }
-      // View scope filter
-      if (currentViewScope !== 'all') {
-        const evScope = ev.viewScope || '';
-        if (evScope !== currentViewScope) return false;
-      }
+      // View scope is now metadata shown on task card, not used for filtering
       return true;
     }
     return y.events.filter(pass).sort((a, b) => a.date.localeCompare(b.date));
