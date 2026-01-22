@@ -1872,7 +1872,7 @@ function renderCourseSections(){
     const key = sectionKey(c.id);
     if(key.cycleIndex >= (cfg.cycleData?.length||0)) key.cycleIndex = Math.max(0, (cfg.cycleData?.length||1)-1);
 
-    const sec = document.createElement('div'); sec.className='form-section course-section'; if(!key.open) sec.classList.add('collapsed');
+    const sec = document.createElement('div'); sec.className='form-section course-section'; sec.dataset.courseId = c.id; if(!key.open) sec.classList.add('collapsed');
 
     // Cycles toolbar
     const hasCycles = (cfg.cycleData && cfg.cycleData.length>0);
