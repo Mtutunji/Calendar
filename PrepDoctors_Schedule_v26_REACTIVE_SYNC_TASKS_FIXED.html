@@ -345,6 +345,72 @@
   .toolbar-section{ display:flex; flex-direction:column; gap:4px; margin-right:12px; }
   .toolbar-title{ font-size:11px; font-weight:800; letter-spacing:.02em; color: var(--prepx-text-muted); text-transform:uppercase; }
 
+  /* ===== Compact Toolbar Layout ===== */
+  .compact-toolbar{
+    padding: 8px 12px !important;
+    border-bottom: 1px solid var(--prepx-border);
+  }
+  .compact-toolbar .toolbar-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .compact-toolbar .toolbar-group{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .compact-toolbar .period-group{
+    min-width: auto;
+  }
+  .compact-toolbar .period-group .month-label{
+    font-weight: 800;
+    font-size: 15px;
+    white-space: nowrap;
+    color: var(--prepx-text);
+  }
+  .compact-toolbar .btn-group{
+    display: flex;
+    gap: 2px;
+    background: #F1F5F9;
+    padding: 3px;
+    border-radius: 8px;
+  }
+  .compact-toolbar .btn-group .btn{
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+  }
+  .compact-toolbar .btn-group .btn:hover{
+    background: rgba(255,255,255,0.7);
+  }
+  .compact-toolbar .btn-group .btn.active{
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .compact-toolbar .select-wrap.compact select{
+    height: 32px;
+    font-size: 12px;
+    padding: 4px 24px 4px 8px;
+    min-width: 100px;
+  }
+  .compact-toolbar .stats-group{
+    margin-left: auto;
+  }
+  /* Responsive: wrap on smaller screens */
+  @media (max-width: 1100px) {
+    .compact-toolbar .toolbar-row{
+      gap: 8px;
+    }
+    .compact-toolbar .btn-group .btn{
+      padding: 4px 6px;
+      font-size: 11px;
+    }
+  }
+
   /* ===== Multi-month calendar blocks ===== */
   .month-section{ margin-top:12px; }
   .month-title{ font-weight:800; margin:10px 6px 6px; }
@@ -705,28 +771,36 @@
 <!-- SCHEDULE (CALENDAR/LIST/KANBAN) VIEW -->
 <section class="hidden" id="calendarView">
 <div class="calendar-wrap card">
-<div class="cal-header">
-<div class="left">
-<div class="toolbar-section">
-<div class="toolbar-title">Period</div>
-<div class="month-label" id="monthTop">—</div>
+<div class="cal-header compact-toolbar">
+<div class="toolbar-row">
+<!-- Period/Date Range Label -->
+<div class="toolbar-group period-group">
+<span class="month-label" id="monthTop">—</span>
 </div>
-<div class="toolbar-section">
-<div class="toolbar-title">View</div>
-<div class="view-switch row" id="viewSwitch">
+<!-- View Type Toggle -->
+<div class="toolbar-group">
+<div class="btn-group view-switch" id="viewSwitch">
 <button class="btn small" data-v="calendar">Calendar</button>
 <button class="btn small" data-v="list">List</button>
 <button class="btn small" data-v="kanban">Kanban</button>
 </div>
 </div>
-<div class="toolbar-section">
-<div class="toolbar-title">Filter</div>
-<button class="btn small" id="toolbarFilterBtn">Filter</button>
+<!-- Range Selection -->
+<div class="toolbar-group">
+<div class="btn-group time-switch" id="timeSwitch">
+<button class="btn small" data-t="day">Day</button>
+<button class="btn small" data-t="week">Week</button>
+<button class="btn small active" data-t="month">Month</button>
+<button class="btn small" data-t="quarter">Qtr</button>
+<button class="btn small" data-t="ytd">YTD</button>
+<button class="btn small" data-t="1y">Year</button>
+<button class="btn small" data-t="custom">Custom</button>
 </div>
-<div class="toolbar-section">
-<div class="toolbar-title">View Scope</div>
-<div class="select-wrap" style="min-width:120px;"><select id="viewScopeSelect">
-<option value="all">All</option>
+</div>
+<!-- View Scope & Filter -->
+<div class="toolbar-group">
+<div class="select-wrap compact"><select id="viewScopeSelect" title="View Scope">
+<option value="all">All Scopes</option>
 <option value="individual">Individual</option>
 <option value="team">Team</option>
 <option value="department">Department</option>
@@ -734,22 +808,12 @@
 <option value="course">Course</option>
 <option value="location">Location</option>
 </select></div>
+<button class="btn small" id="toolbarFilterBtn" title="Filter Tasks">Filter</button>
 </div>
-<div class="toolbar-section">
-<div class="toolbar-title">Range</div>
-<div class="time-switch row" id="timeSwitch">
-<button class="btn small" data-t="day">Day</button>
-<button class="btn small" data-t="week">Week</button>
-<button class="btn small active" data-t="month">Month</button>
-<button class="btn small" data-t="quarter">Quarter</button>
-<button class="btn small" data-t="ytd">YTD</button>
-<button class="btn small" data-t="1y">1 Year</button>
-<button class="btn small" data-t="custom">Custom</button>
+<!-- Stats -->
+<div class="toolbar-group stats-group">
+<div class="muted mono" id="stats"></div>
 </div>
-</div>
-</div>
-<div class="right">
-<div class="toolbar-section"><div class="toolbar-title">Stats</div><div class="row" style="align-items:center; gap:8px;"><div class="muted mono" id="stats"></div></div></div>
 </div>
 </div>
 <div class="weekday-row" id="weekdayRow"></div>
@@ -2983,6 +3047,7 @@ let viewMode = 'calendar'; // calendar | list | kanban
 let timeMode = 'month'; // day | week | month | quarter | ytd | 6m | 1y | custom
 let statsScope = 'view'; // 'view' | 'all'
 let customRange = { start:null, end:null };
+let currentViewScope = 'all'; // all | individual | team | department | company | course | location
 
 /* =========================================================
    View Sync + Asana-style motion (FLIP)
@@ -3216,6 +3281,11 @@ function renderCalendarGrid(){
     if(filt.instructors && filt.instructors.length){
       const ins = ev.instructors||[];
       if(!ins.some(x=>filt.instructors.includes(x))) return false;
+    }
+    // View scope filter (same as List/Kanban)
+    if(currentViewScope !== 'all'){
+      const evScope = ev.viewScope || '';
+      if(evScope !== currentViewScope) return false;
     }
     return true;
   }
@@ -7326,9 +7396,7 @@ $('#saveAppSettings').onclick = ()=>{
     return Store.appSettings.viewScopes || defaultViewScopes;
   }
 
-  /* --- Current view scope filter --- */
-  let currentViewScope = 'all';
-
+  /* --- Current view scope filter (uses global currentViewScope) --- */
   const viewScopeSelect = document.getElementById('viewScopeSelect');
   if (viewScopeSelect) {
     viewScopeSelect.onchange = function() {
