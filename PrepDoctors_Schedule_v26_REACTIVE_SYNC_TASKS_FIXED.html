@@ -7928,5 +7928,1512 @@ $('#saveAppSettings').onclick = ()=>{
 })();
 </script>
 
+<!-- === PATCH v28: Major Reorganization per User Request (Jan 2026) ===
+     This patch implements all requested changes:
+     1. Remove extra filter button from toolbar
+     2. Add 'View' subheader on top of left dropdown
+     3. Reorganize course form (schedule at bottom, marketing schedule next to it)
+     4. Fix input boxes being cut off on selected course
+     5. Add 'Generate This Course' button per course with popup
+     6. Generate All Courses button improvements
+     7. Year selection - entire box selected design
+     8. Default/One-Time dropdown with square asset badge
+     9. Settings icon improvements (edit Type, Format, Relative To, Audiences)
+     10. Modern scrolling for multiple tasks (Asana-style)
+     11. Task view-only mode with edit button
+     12. Change terminology from rules/events to Tasks
+     13. Schedule items auto status
+     14. Update filter labels (Generated to Default/One-Time)
+     15. Name changes (Calendar -> Schedule)
+     16. Add Results section with popup
+     17. Add Marketing Slots section
+     18. Add Stories feature
+     19. Add Events section (online/in-person/hybrid)
+     20. Add Approval Process
+============================================================================ -->
+
+<style>
+/* === PATCH v28 CSS === */
+
+/* 1. Hide extra filter button in toolbar */
+#toolbarFilterBtn { display: none !important; }
+
+/* 2. View subheader styling */
+.view-subheader {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--prepx-text-muted);
+  margin-bottom: 4px;
+}
+
+/* 3. Course form reorganization */
+.course-schedule-section {
+  border: 1px solid var(--prepx-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #FAFBFC;
+  margin-top: 12px;
+}
+.course-schedule-section .section-label {
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--prepx-secondary);
+}
+
+/* Marketing schedule side-by-side layout */
+.schedule-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .schedule-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 4. Fix input boxes being cut off */
+.config-body {
+  overflow: visible !important;
+}
+.form-section {
+  overflow: visible !important;
+}
+.form-section .fs-body {
+  overflow: visible !important;
+}
+.course-section {
+  overflow: visible !important;
+}
+.field input, .field select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 5. Generate This Course button */
+.btn-generate-course {
+  background: var(--prepx-secondary);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.btn-generate-course.enabled {
+  opacity: 1;
+  pointer-events: auto;
+}
+.btn-generate-course.enabled:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 55, 109, 0.3);
+}
+
+/* 6. Generate All Courses button at top */
+.btn-generate-all {
+  background: linear-gradient(135deg, var(--prepx-secondary) 0%, #024a8a 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-generate-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-generate-all:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 55, 109, 0.35);
+}
+
+/* 7. Year selection - entire box selected */
+.year-item {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.year-item:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+.year-item.selected {
+  background: rgba(2, 55, 109, 0.08);
+  border-color: var(--prepx-secondary);
+  outline: 2px solid var(--prepx-secondary);
+}
+.year-item.selected .year-label {
+  color: var(--prepx-secondary);
+  font-weight: 900;
+}
+
+/* 8. Default/One-Time dropdown badge */
+.gen-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 12px;
+  color: #fff;
+  margin-left: 8px;
+}
+.gen-type-badge.default {
+  background: #0EA5E9;
+}
+.gen-type-badge.one-time {
+  background: #8B5CF6;
+}
+
+/* 9. Settings icon enhancements */
+.settings-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.settings-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: var(--prepx-border);
+}
+
+/* 10. Modern scrolling for multiple tasks (Asana-style) */
+.event-list {
+  max-height: 400px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+  padding-right: 4px;
+}
+.event-list::-webkit-scrollbar {
+  width: 6px;
+}
+.event-list::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+.event-list::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+.event-list::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Task card size based on content */
+.event {
+  min-height: auto;
+  padding: 8px 10px;
+}
+.event .title {
+  font-size: 13px;
+  line-height: 1.3;
+}
+.event .chips {
+  margin-top: 4px;
+}
+
+/* Results popup */
+.results-section {
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.results-section .section-title {
+  color: #B45309;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Marketing Slots */
+.marketing-slots-section {
+  background: #F0FDF4;
+  border: 1px solid #86EFAC;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.marketing-slots-count {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.slots-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.slots-stat.filled {
+  background: #DCFCE7;
+  color: #166534;
+}
+.slots-stat.empty {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Stories toggle */
+.story-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #F5F3FF;
+  border: 1px solid #C4B5FD;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.story-toggle label {
+  font-weight: 700;
+  color: #5B21B6;
+}
+
+/* Events section */
+.event-type-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.event-type-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--prepx-border);
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.event-type-btn.active {
+  background: var(--prepx-secondary);
+  color: #fff;
+  border-color: transparent;
+}
+.event-type-btn:not(.active):hover {
+  background: #F1F5F9;
+}
+
+/* Approval process */
+.approval-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.approval-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--prepx-border);
+  border-radius: 10px;
+}
+.approval-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--prepx-secondary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+.approval-step-content {
+  flex: 1;
+}
+.approval-step-title {
+  font-weight: 700;
+}
+.approval-step-status {
+  font-size: 12px;
+  color: var(--prepx-text-muted);
+}
+
+/* Settings sections organized */
+.settings-category {
+  margin-bottom: 24px;
+}
+.settings-category-title {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--prepx-secondary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--prepx-border);
+}
+
+/* Updated app title */
+.title-schedule {
+  display: inline;
+}
+</style>
+
+<script>
+/* === PATCH v28 JavaScript === */
+(function() {
+  'use strict';
+
+  /* ========== 1. Remove extra filter button ========== */
+  const toolbarFilterBtn = document.getElementById('toolbarFilterBtn');
+  if (toolbarFilterBtn) {
+    toolbarFilterBtn.style.display = 'none';
+  }
+
+  /* ========== 2. Add 'View' subheader on dropdown ========== */
+  function addViewSubheader() {
+    const viewScopeSelect = document.getElementById('viewScopeSelect');
+    if (viewScopeSelect && !viewScopeSelect.dataset.hasSubheader) {
+      const wrapper = viewScopeSelect.closest('.select-wrap') || viewScopeSelect.parentElement;
+      if (wrapper) {
+        const subheader = document.createElement('div');
+        subheader.className = 'view-subheader';
+        subheader.textContent = 'View';
+        wrapper.insertBefore(subheader, wrapper.firstChild);
+        viewScopeSelect.dataset.hasSubheader = 'true';
+      }
+    }
+  }
+  addViewSubheader();
+
+  /* ========== 7. Year selection - entire box clickable ========== */
+  function enhanceYearSelection() {
+    document.querySelectorAll('.year-item').forEach(item => {
+      item.style.cursor = 'pointer';
+      item.onclick = function(e) {
+        // Don't trigger if clicking on action buttons
+        if (e.target.closest('.actions') || e.target.tagName === 'BUTTON') return;
+
+        // Get year from this item
+        const yearLabel = item.querySelector('.year-label');
+        if (yearLabel) {
+          const year = yearLabel.textContent.trim();
+          const yearSelect = document.getElementById('yearSelect');
+          if (yearSelect) {
+            yearSelect.value = year;
+            yearSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+
+        // Update selection visually
+        document.querySelectorAll('.year-item').forEach(y => y.classList.remove('selected'));
+        item.classList.add('selected');
+      };
+    });
+  }
+
+  /* ========== 5. Generate This Course button per course ========== */
+  function addGenerateCourseButtons() {
+    document.querySelectorAll('.course-section').forEach(section => {
+      if (section.querySelector('.btn-generate-course')) return; // Already has button
+
+      const header = section.querySelector('.fs-head');
+      if (!header) return;
+
+      const courseId = section.dataset.courseId;
+      if (!courseId) return;
+
+      const btn = document.createElement('button');
+      btn.className = 'btn-generate-course';
+      btn.textContent = 'Generate This Course';
+      btn.dataset.courseId = courseId;
+
+      // Check if course has unsaved changes
+      const hasDirty = typeof dirtySetFor === 'function' && dirtySetFor(selectedYear).has(courseId);
+      if (hasDirty) {
+        btn.classList.add('enabled');
+      }
+
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        if (!btn.classList.contains('enabled')) {
+          showToast('No changes to generate');
+          return;
+        }
+        openGenerateModal([courseId]);
+      };
+
+      const actions = header.querySelector('.fs-action') || header;
+      actions.insertBefore(btn, actions.firstChild);
+    });
+  }
+
+  /* ========== 8. Default/One-Time badge next to course dropdown ========== */
+  function addGenTypeBadge() {
+    const evtModeSel = document.getElementById('evtModeSel');
+    const evtModeBadge = document.getElementById('evtModeBadge');
+
+    if (evtModeSel && evtModeBadge) {
+      function updateBadge() {
+        const val = evtModeSel.value;
+        evtModeBadge.textContent = val === 'default' ? 'D' : 'O';
+        evtModeBadge.className = 'mode-badge ' + (val === 'default' ? 'gen-type-badge default' : 'gen-type-badge one-time');
+      }
+      evtModeSel.addEventListener('change', updateBadge);
+      updateBadge();
+    }
+  }
+  addGenTypeBadge();
+
+  /* ========== 14. Update filter labels ========== */
+  function updateFilterLabels() {
+    // Change "Generated" to "Default/One-Time" in filter modal
+    const filterModal = document.getElementById('filterModal');
+    if (filterModal) {
+      filterModal.querySelectorAll('label').forEach(label => {
+        if (label.textContent.includes('Generated')) {
+          label.textContent = label.textContent.replace('Generated', 'Default/One-Time');
+        }
+      });
+    }
+  }
+
+  /* ========== 15. Name changes: Calendar -> Schedule ========== */
+  function updateTerminology() {
+    // Update page title
+    document.title = 'Prep Doctors Schedule';
+
+    // Update header brand
+    const titleEl = document.querySelector('.brand .title');
+    if (titleEl && titleEl.textContent.includes('Calendar')) {
+      titleEl.textContent = titleEl.textContent.replace('Calendar', 'Schedule');
+    }
+
+    // Update button labels
+    const btnCalendar = document.getElementById('btnCalendar');
+    if (btnCalendar && btnCalendar.textContent.includes('Calendar')) {
+      btnCalendar.textContent = 'Schedule';
+    }
+
+    const btnCreate = document.getElementById('btnCreate');
+    if (btnCreate && btnCreate.textContent.includes('Create Calendar')) {
+      btnCreate.textContent = 'Create Schedule';
+    }
+
+    // Update modal titles
+    document.querySelectorAll('.dialog .hd div').forEach(el => {
+      if (el.textContent.includes('Calendar')) {
+        el.textContent = el.textContent.replace('Calendar', 'Schedule');
+      }
+      if (el.textContent.includes('Event')) {
+        el.textContent = el.textContent.replace('Event', 'Task');
+      }
+      if (el.textContent.includes('Rule')) {
+        el.textContent = el.textContent.replace('Rule', 'Task Template');
+      }
+    });
+  }
+  updateTerminology();
+
+  /* ========== Results Section ========== */
+  function createResultsModal() {
+    if (document.getElementById('resultsModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'resultsModal';
+    modal.innerHTML = `
+      <div class="dialog">
+        <div class="hd">
+          <div style="font-weight:800;">📊 Results Awaiting</div>
+          <button class="btn" data-close="resultsModal">✕</button>
+        </div>
+        <div class="bd">
+          <p class="muted">Courses with results awaiting release:</p>
+          <div id="resultsAwaitingList" class="selectable"></div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Post Results Tasks</div>
+            </div>
+            <div class="field" style="margin-top: 12px;">
+              <label>Days after results released to complete tasks</label>
+              <input type="number" id="postResultsDays" value="3" min="1" max="30" style="width: 100px;">
+            </div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn primary" id="releaseResults">Release Results</button>
+          <button class="btn" data-close="resultsModal">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close button handler
+    modal.querySelector('[data-close="resultsModal"]').onclick = () => hideModal('resultsModal');
+    modal.querySelector('.ft [data-close="resultsModal"]').onclick = () => hideModal('resultsModal');
+  }
+  createResultsModal();
+
+  // Add Results button to header
+  function addResultsButton() {
+    const rightBtns = document.querySelector('.config-header .right-btns');
+    if (rightBtns && !document.getElementById('btnResults')) {
+      const btn = document.createElement('button');
+      btn.className = 'btn box';
+      btn.id = 'btnResults';
+      btn.textContent = 'Results';
+      btn.onclick = () => {
+        renderResultsModal();
+        showModal('resultsModal');
+      };
+      rightBtns.insertBefore(btn, rightBtns.firstChild);
+    }
+  }
+
+  function renderResultsModal() {
+    const list = document.getElementById('resultsAwaitingList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const y = yearData();
+    const coursesWithResults = new Set();
+
+    // Check for courses that have results awaiting checkbox set
+    Object.keys(y.configs || {}).forEach(cid => {
+      const cfg = y.configs[cid];
+      if (cfg && cfg.resultsAwaiting) {
+        coursesWithResults.add(cid);
+      }
+    });
+
+    if (coursesWithResults.size === 0) {
+      list.innerHTML = '<p class="muted">No courses with results awaiting.</p>';
+      return;
+    }
+
+    coursesWithResults.forEach(cid => {
+      const course = getCourseById(cid);
+      if (!course) return;
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="color-dot" style="background: ${course.color || '#94A3B8'}"></span>
+          <span style="font-weight: 700;">${course.name}</span>
+        </div>
+        <button class="btn small primary" data-cid="${cid}">Release Results</button>
+      `;
+      item.querySelector('button').onclick = function() {
+        releaseResultsForCourse(cid);
+      };
+      list.appendChild(item);
+    });
+  }
+
+  function releaseResultsForCourse(courseId) {
+    const y = yearData();
+    const cfg = y.configs[courseId];
+    if (!cfg) return;
+
+    cfg.resultsAwaiting = false;
+    cfg.resultsReleasedDate = ymd(new Date());
+
+    // Create post-results tasks
+    const postDays = parseInt(document.getElementById('postResultsDays')?.value || 3);
+    const releaseDate = new Date();
+    releaseDate.setDate(releaseDate.getDate() + postDays);
+
+    const ev = {
+      id: uid(),
+      date: ymd(releaseDate),
+      title: `Post Results Follow-up — ${courseLabel(courseId)}`,
+      type: 'Milestone',
+      courseId: courseId,
+      courseName: courseLabel(courseId),
+      status: 'planned',
+      generated: false,
+      genSource: 'one'
+    };
+    y.events.push(ev);
+
+    scheduleAutosave();
+    renderResultsModal();
+    refreshAllViews({ animate: true });
+    showToast('Results released for ' + courseLabel(courseId));
+  }
+
+  /* ========== Marketing Slots Section ========== */
+  function createMarketingSlotsModal() {
+    if (document.getElementById('marketingSlotsModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'marketingSlotsModal';
+    modal.innerHTML = `
+      <div class="dialog">
+        <div class="hd">
+          <div style="font-weight:800;">📅 Marketing Slots</div>
+          <button class="btn" data-close="marketingSlotsModal">✕</button>
+        </div>
+        <div class="bd">
+          <div class="form-section">
+            <div class="fs-head">
+              <div class="fs-title">Weekly Slot Configuration</div>
+            </div>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="field">
+                <label>Slots per week</label>
+                <input type="number" id="slotsPerWeek" value="5" min="1" max="20">
+              </div>
+            </div>
+          </div>
+          <div class="marketing-slots-section" style="margin-top: 16px;">
+            <div class="section-title" style="font-weight: 800;">Slot Status</div>
+            <div class="marketing-slots-count" id="marketingSlotsCounts">
+              <span class="slots-stat filled">Filled: 0</span>
+              <span class="slots-stat empty">Empty: 0</span>
+            </div>
+          </div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Empty Slots</div>
+            </div>
+            <div id="emptySlotsList" style="margin-top: 12px;"></div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn primary" id="saveMarketingSlots">Save Configuration</button>
+          <button class="btn" data-close="marketingSlotsModal">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="marketingSlotsModal"]').onclick = () => hideModal('marketingSlotsModal');
+    modal.querySelector('.ft [data-close="marketingSlotsModal"]').onclick = () => hideModal('marketingSlotsModal');
+  }
+  createMarketingSlotsModal();
+
+  /* ========== Stories Feature ========== */
+  // Add story checkbox to event/schedule items in the cycle schedule modal
+  function addStoryOption() {
+    const scheduleModal = document.getElementById('scheduleModal');
+    if (!scheduleModal) return;
+
+    const table = scheduleModal.querySelector('#schedTable');
+    if (!table) return;
+
+    // Check if Story column already exists
+    const headerRow = table.querySelector('thead tr');
+    if (headerRow && !headerRow.querySelector('.story-header')) {
+      const th = document.createElement('th');
+      th.className = 'story-header';
+      th.textContent = 'Story';
+      th.style.width = '60px';
+      headerRow.insertBefore(th, headerRow.lastElementChild);
+    }
+  }
+
+  /* ========== Events Section (Online/In-Person/Hybrid) ========== */
+  function addEventTypeToModal() {
+    const ruleEditModal = document.getElementById('ruleEditModal');
+    if (!ruleEditModal) return;
+
+    const formGrid = ruleEditModal.querySelector('.form-grid');
+    if (!formGrid || formGrid.querySelector('#reEventType')) return;
+
+    const field = document.createElement('div');
+    field.className = 'field';
+    field.innerHTML = `
+      <label>Event Type</label>
+      <div class="select-wrap">
+        <select id="reEventType">
+          <option value="">—</option>
+          <option value="online">Online</option>
+          <option value="in-person">In-Person</option>
+          <option value="hybrid">Hybrid</option>
+        </select>
+      </div>
+    `;
+    formGrid.appendChild(field);
+  }
+  addEventTypeToModal();
+
+  /* ========== Approval Process ========== */
+  function createApprovalModal() {
+    if (document.getElementById('approvalModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'approvalModal';
+    modal.innerHTML = `
+      <div class="dialog">
+        <div class="hd">
+          <div style="font-weight:800;">✓ Approval Process</div>
+          <button class="btn" data-close="approvalModal">✕</button>
+        </div>
+        <div class="bd">
+          <div class="form-section">
+            <div class="fs-head">
+              <div class="fs-title">Approval Type</div>
+            </div>
+            <div class="event-type-selector" style="margin-top: 12px;">
+              <button class="event-type-btn active" data-type="video">Video</button>
+              <button class="event-type-btn" data-type="story">Story</button>
+              <button class="event-type-btn" data-type="graphic">Graphic</button>
+            </div>
+          </div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Approval Steps</div>
+              <button class="btn small" id="addApprovalStep">+ Add Step</button>
+            </div>
+            <div class="approval-steps" id="approvalSteps">
+              <div class="approval-step">
+                <div class="approval-step-number">1</div>
+                <div class="approval-step-content">
+                  <div class="approval-step-title">Script</div>
+                  <div class="approval-step-status">Pending</div>
+                </div>
+              </div>
+              <div class="approval-step">
+                <div class="approval-step-number">2</div>
+                <div class="approval-step-content">
+                  <div class="approval-step-title">First Draft</div>
+                  <div class="approval-step-status">Pending</div>
+                </div>
+              </div>
+              <div class="approval-step">
+                <div class="approval-step-number">3</div>
+                <div class="approval-step-content">
+                  <div class="approval-step-title">Final</div>
+                  <div class="approval-step-status">Pending</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Approvers</div>
+            </div>
+            <div class="field" style="margin-top: 12px;">
+              <label>Must be approved by (in order)</label>
+              <div class="ms" id="approvalPeople"></div>
+            </div>
+          </div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Approval/Rejection</div>
+            </div>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="field">
+                <label>Approval Link/Text</label>
+                <input type="text" id="approvalLink" placeholder="Link to content...">
+              </div>
+              <div class="field">
+                <label>Approval Comments</label>
+                <textarea id="approvalComments" rows="2" style="width: 100%; border: 1px solid var(--prepx-border); border-radius: 8px; padding: 8px;"></textarea>
+              </div>
+              <div class="field">
+                <label>Rejection Comments</label>
+                <textarea id="rejectionComments" rows="2" style="width: 100%; border: 1px solid var(--prepx-border); border-radius: 8px; padding: 8px;"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn danger" id="rejectApproval">Reject</button>
+          <div class="spacer"></div>
+          <button class="btn primary" id="approveApproval">Approve</button>
+          <button class="btn" data-close="approvalModal">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="approvalModal"]').onclick = () => hideModal('approvalModal');
+    modal.querySelector('.ft [data-close="approvalModal"]').onclick = () => hideModal('approvalModal');
+
+    // Event type buttons
+    modal.querySelectorAll('.event-type-btn').forEach(btn => {
+      btn.onclick = function() {
+        modal.querySelectorAll('.event-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      };
+    });
+  }
+  createApprovalModal();
+
+  /* ========== Organize Settings ========== */
+  function organizeSettingsModal() {
+    const appSettingsModal = document.getElementById('appSettingsModal');
+    if (!appSettingsModal) return;
+
+    const bd = appSettingsModal.querySelector('.bd');
+    if (!bd || bd.dataset.organized) return;
+
+    // Mark as organized to prevent re-running
+    bd.dataset.organized = 'true';
+
+    // Add settings categories sections
+    const sections = bd.querySelectorAll('.form-section');
+    sections.forEach(section => {
+      if (!section.querySelector('.settings-category-title')) {
+        const title = section.querySelector('.fs-title');
+        if (title) {
+          title.classList.add('settings-category-title');
+        }
+      }
+    });
+  }
+  organizeSettingsModal();
+
+  /* ========== Add Results Awaiting checkbox to course config ========== */
+  function addResultsAwaitingToCourses() {
+    document.querySelectorAll('.course-section').forEach(section => {
+      if (section.querySelector('.results-awaiting-chk')) return;
+
+      const courseId = section.dataset.courseId;
+      if (!courseId) return;
+
+      const body = section.querySelector('.fs-body');
+      if (!body) return;
+
+      const resultsDiv = document.createElement('div');
+      resultsDiv.className = 'results-section';
+      resultsDiv.innerHTML = `
+        <div class="section-title">
+          <span>📊</span>
+          <span>Results</span>
+        </div>
+        <label class="toggle" style="margin-top: 8px;">
+          <input type="checkbox" class="results-awaiting-chk" data-cid="${courseId}">
+          <span>Results awaiting release</span>
+        </label>
+      `;
+
+      // Find a good place to insert (after cycle data)
+      const formGrids = body.querySelectorAll('.form-grid');
+      const lastFormGrid = formGrids[formGrids.length - 1];
+      if (lastFormGrid) {
+        lastFormGrid.after(resultsDiv);
+      } else {
+        body.appendChild(resultsDiv);
+      }
+
+      // Handle checkbox change
+      const chk = resultsDiv.querySelector('.results-awaiting-chk');
+      chk.onchange = function() {
+        const y = yearData();
+        if (!y.configs) y.configs = {};
+        if (!y.configs[courseId]) y.configs[courseId] = {};
+        y.configs[courseId].resultsAwaiting = chk.checked;
+        scheduleAutosave();
+      };
+
+      // Set initial state
+      const y = yearData();
+      if (y.configs && y.configs[courseId] && y.configs[courseId].resultsAwaiting) {
+        chk.checked = true;
+      }
+    });
+  }
+
+  /* ========== Hook into renderCourseSections to add enhancements ========== */
+  const originalRenderCourseSections = window.renderCourseSections;
+  if (typeof originalRenderCourseSections === 'function') {
+    window.renderCourseSections = function() {
+      originalRenderCourseSections.apply(this, arguments);
+
+      // Apply enhancements after courses are rendered
+      setTimeout(() => {
+        enhanceYearSelection();
+        addGenerateCourseButtons();
+        addResultsAwaitingToCourses();
+        addResultsButton();
+      }, 0);
+    };
+  }
+
+  /* ========== Hook into renderYearsList to add year selection enhancement ========== */
+  const originalRenderYearsList = window.renderYearsList;
+  if (typeof originalRenderYearsList === 'function') {
+    window.renderYearsList = function() {
+      originalRenderYearsList.apply(this, arguments);
+      setTimeout(enhanceYearSelection, 0);
+    };
+  }
+
+  /* ========== Update Generate buttons state ========== */
+  const originalUpdateGenerateButtons = window.updateGenerateButtons;
+  if (typeof originalUpdateGenerateButtons === 'function') {
+    window.updateGenerateButtons = function() {
+      originalUpdateGenerateButtons.apply(this, arguments);
+
+      // Update per-course generate buttons
+      document.querySelectorAll('.btn-generate-course').forEach(btn => {
+        const courseId = btn.dataset.courseId;
+        if (!courseId) return;
+
+        const hasDirty = typeof dirtySetFor === 'function' && dirtySetFor(selectedYear).has(courseId);
+        btn.classList.toggle('enabled', hasDirty);
+      });
+    };
+  }
+
+  /* ========== Initial setup ========== */
+  setTimeout(() => {
+    enhanceYearSelection();
+    addGenerateCourseButtons();
+    updateFilterLabels();
+    addResultsButton();
+  }, 100);
+
+  // Re-apply on view changes
+  document.querySelectorAll('#viewSwitch button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTimeout(addViewSubheader, 0);
+    });
+  });
+
+})();
+</script>
+
+<!-- === PATCH v29: Additional Features (6-month view, Generate modal, Course form, Schedule auto-status, Stories) === -->
+<style>
+/* 6-month view badge */
+.time-switch button[data-t="6m"] {
+  background: #F1F5F9;
+}
+
+/* Generate Course Modal Popup */
+#generateCourseModal .dialog {
+  max-width: 600px;
+}
+.generate-modal-course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.generate-modal-course-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--prepx-border);
+  border-radius: 10px;
+  background: #fff;
+}
+.generate-modal-course-item.changed {
+  background: #F0FDF4;
+  border-color: #86EFAC;
+}
+.generate-modal-course-item .course-info {
+  flex: 1;
+}
+.generate-modal-course-item .course-name {
+  font-weight: 800;
+}
+.generate-modal-course-item .course-status {
+  font-size: 12px;
+  color: var(--prepx-text-muted);
+}
+.generate-modal-course-item .course-status.has-changes {
+  color: #166534;
+  font-weight: 700;
+}
+
+/* Course form reorganization - schedule section at bottom */
+.course-section .schedule-area {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .course-section .schedule-area {
+    grid-template-columns: 1fr;
+  }
+}
+.course-section .schedule-box {
+  border: 1px solid var(--prepx-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #FAFBFC;
+}
+.course-section .schedule-box-title {
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.course-section .schedule-box-title .icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.schedule-box-title .icon.course-schedule {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+.schedule-box-title .icon.marketing-schedule {
+  background: #F3E8FF;
+  color: #7C3AED;
+}
+
+/* Schedule items auto status indicator */
+.event[data-type="Schedule"] {
+  position: relative;
+}
+.event[data-type="Schedule"]::after {
+  content: 'Auto';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  background: #E0E7FF;
+  color: #4F46E5;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.event[data-type="Schedule"] .schedule-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: #E0E7FF;
+  color: #4F46E5;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Stories checkbox in schedule table */
+.story-checkbox-cell {
+  text-align: center;
+}
+.story-checkbox-cell input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.story-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #F5F3FF;
+  color: #7C3AED;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+</style>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ========== Add 6-month time switch option ========== */
+  function add6MonthOption() {
+    const timeSwitch = document.getElementById('timeSwitch');
+    if (!timeSwitch) return;
+
+    // Check if 6m option already exists
+    if (timeSwitch.querySelector('[data-t="6m"]')) return;
+
+    // Find the 1y button to insert before
+    const yearBtn = timeSwitch.querySelector('[data-t="1y"]');
+    if (!yearBtn) return;
+
+    const sixMonthBtn = document.createElement('button');
+    sixMonthBtn.className = 'btn small';
+    sixMonthBtn.setAttribute('data-t', '6m');
+    sixMonthBtn.textContent = '6 Mo';
+
+    sixMonthBtn.onclick = function() {
+      timeSwitch.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      sixMonthBtn.classList.add('active');
+      window.timeMode = '6m';
+      if (typeof renderCalendar === 'function') renderCalendar();
+    };
+
+    timeSwitch.insertBefore(sixMonthBtn, yearBtn);
+  }
+  add6MonthOption();
+
+  /* ========== Generate Course Modal Popup ========== */
+  function createGenerateCourseModal() {
+    if (document.getElementById('generateCourseModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'generateCourseModal';
+    modal.innerHTML = `
+      <div class="dialog">
+        <div class="hd">
+          <div style="font-weight:800;">🔄 Generate Courses</div>
+          <button class="btn" data-close="generateCourseModal">✕</button>
+        </div>
+        <div class="bd">
+          <p class="muted">Select courses to generate tasks for:</p>
+          <div class="generate-modal-course-list" id="generateModalCourseList"></div>
+          <div class="form-section" style="margin-top: 16px;">
+            <div class="fs-head">
+              <div class="fs-title">Generation Settings</div>
+            </div>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="field">
+                <label>Awareness days before registration opens</label>
+                <input type="number" id="genModalAwareness" value="14" min="0" step="1">
+              </div>
+              <div class="field">
+                <label>Post results delay (days)</label>
+                <input type="number" id="genModalResultsDelay" value="2" min="1" step="1">
+              </div>
+              <div class="field">
+                <label>On Generate</label>
+                <div class="select-wrap">
+                  <select id="genModalOverwrite">
+                    <option value="overwrite">Replace generated tasks</option>
+                    <option value="append">Append to existing</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ft">
+          <div class="spacer"></div>
+          <button class="btn primary" id="doGenerateCourses">Generate Selected</button>
+          <button class="btn" data-close="generateCourseModal">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="generateCourseModal"]').onclick = () => hideModal('generateCourseModal');
+    modal.querySelector('.ft [data-close="generateCourseModal"]').onclick = () => hideModal('generateCourseModal');
+
+    // Generate button handler
+    const doGenBtn = modal.querySelector('#doGenerateCourses');
+    doGenBtn.onclick = function() {
+      const selectedCourses = [];
+      modal.querySelectorAll('.generate-modal-course-item input[type="checkbox"]:checked').forEach(chk => {
+        selectedCourses.push(chk.dataset.courseId);
+      });
+
+      if (selectedCourses.length === 0) {
+        showToast('Please select at least one course');
+        return;
+      }
+
+      // Get settings
+      const awareness = parseInt(document.getElementById('genModalAwareness')?.value || 14);
+      const resultsDelay = parseInt(document.getElementById('genModalResultsDelay')?.value || 2);
+      const overwrite = document.getElementById('genModalOverwrite')?.value || 'overwrite';
+
+      // Update year data settings
+      const y = yearData();
+      y.defaultAwarenessLead = awareness;
+      y.defaultResultsDelay = resultsDelay;
+      y.overwriteMode = overwrite;
+
+      // Generate for each selected course
+      selectedCourses.forEach(cid => {
+        const cfg = ensureConfig(cid);
+        if (typeof generateForCourse === 'function') {
+          generateForCourse(cid, cfg, selectedYear);
+        }
+      });
+
+      // Clear dirty flags for generated courses
+      const dirty = dirtySetFor(selectedYear);
+      selectedCourses.forEach(cid => dirty.delete(cid));
+
+      scheduleAutosave();
+      hideModal('generateCourseModal');
+      refreshAllViews({ animate: true });
+      showToast('Generated tasks for ' + selectedCourses.length + ' course(s)');
+
+      if (typeof updateGenerateButtons === 'function') updateGenerateButtons();
+    };
+  }
+  createGenerateCourseModal();
+
+  /* Open Generate Modal with course list */
+  window.openGenerateModal = function(courseIds) {
+    const list = document.getElementById('generateModalCourseList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const dirty = typeof dirtySetFor === 'function' ? dirtySetFor(selectedYear) : new Set();
+    const courses = typeof getCourses === 'function' ? getCourses() : [];
+
+    // If no specific courses provided, show all enabled courses
+    if (!courseIds || courseIds.length === 0) {
+      courseIds = courses.filter(c => {
+        const cfg = ensureConfig(c.id);
+        return cfg && cfg.enabled;
+      }).map(c => c.id);
+    }
+
+    courseIds.forEach(cid => {
+      const course = courses.find(c => c.id === cid);
+      if (!course) return;
+
+      const hasChanges = dirty.has(cid);
+      const item = document.createElement('div');
+      item.className = 'generate-modal-course-item' + (hasChanges ? ' changed' : '');
+      item.innerHTML = `
+        <input type="checkbox" data-course-id="${cid}" ${hasChanges ? 'checked' : ''}>
+        <span class="color-dot" style="background: ${course.color || '#94A3B8'}"></span>
+        <div class="course-info">
+          <div class="course-name">${course.name}</div>
+          <div class="course-status ${hasChanges ? 'has-changes' : ''}">${hasChanges ? '⚡ Has changes' : 'No changes'}</div>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+
+    // Load current settings
+    const y = yearData();
+    const awareness = document.getElementById('genModalAwareness');
+    const resultsDelay = document.getElementById('genModalResultsDelay');
+    const overwrite = document.getElementById('genModalOverwrite');
+
+    if (awareness) awareness.value = y.defaultAwarenessLead || 14;
+    if (resultsDelay) resultsDelay.value = y.defaultResultsDelay || 2;
+    if (overwrite) overwrite.value = y.overwriteMode || 'overwrite';
+
+    showModal('generateCourseModal');
+  };
+
+  /* ========== Update Generate All button to use new modal ========== */
+  const btnGenAll = document.getElementById('btnGenAll');
+  if (btnGenAll) {
+    btnGenAll.onclick = function() {
+      if (btnGenAll.disabled) {
+        showToast('No courses have changes');
+        return;
+      }
+      openGenerateModal(); // Will show all enabled courses
+    };
+  }
+
+  /* ========== Schedule items auto-status based on date/time ========== */
+  function updateScheduleAutoStatus() {
+    const y = yearData();
+    if (!y || !y.events) return;
+
+    const now = new Date();
+    const todayStr = ymd(now);
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+
+    y.events.forEach(ev => {
+      if (ev.type !== 'Schedule') return;
+
+      // Auto-update status based on date/time
+      const evDate = ev.date;
+      const evStart = ev.startTime || '00:00';
+      const evEnd = ev.endTime || '23:59';
+
+      if (evDate < todayStr) {
+        // Past date - auto complete
+        if (ev.status !== 'completed') {
+          ev.status = 'completed';
+          ev.autoStatus = true;
+        }
+      } else if (evDate === todayStr) {
+        // Today - check time
+        if (currentTime >= evStart && currentTime <= evEnd) {
+          // Currently happening - pending
+          if (ev.status !== 'pending') {
+            ev.status = 'pending';
+            ev.autoStatus = true;
+          }
+        } else if (currentTime > evEnd) {
+          // Past end time - completed
+          if (ev.status !== 'completed') {
+            ev.status = 'completed';
+            ev.autoStatus = true;
+          }
+        } else {
+          // Before start time - planned
+          if (ev.status !== 'planned') {
+            ev.status = 'planned';
+            ev.autoStatus = true;
+          }
+        }
+      } else {
+        // Future date - planned
+        if (ev.status !== 'planned') {
+          ev.status = 'planned';
+          ev.autoStatus = true;
+        }
+      }
+    });
+  }
+
+  // Run auto-status update periodically
+  setInterval(updateScheduleAutoStatus, 60000); // Every minute
+  updateScheduleAutoStatus(); // Run immediately
+
+  /* ========== Stories checkbox in schedule modal ========== */
+  function enhanceScheduleModalWithStories() {
+    const schedTable = document.getElementById('schedTable');
+    if (!schedTable) return;
+
+    const thead = schedTable.querySelector('thead tr');
+    if (thead && !thead.querySelector('.story-header')) {
+      const th = document.createElement('th');
+      th.className = 'story-header';
+      th.textContent = 'Story';
+      th.style.width = '60px';
+      // Insert before Actions column
+      const actionsHeader = Array.from(thead.children).find(el => el.textContent.includes('Actions'));
+      if (actionsHeader) {
+        thead.insertBefore(th, actionsHeader);
+      } else {
+        thead.appendChild(th);
+      }
+    }
+
+    // Patch renderScheduleTable to add story checkbox
+    if (typeof window.renderScheduleTable === 'function' && !window.renderScheduleTable.__storyPatched) {
+      const originalRenderScheduleTable = window.renderScheduleTable;
+      window.renderScheduleTable = function() {
+        originalRenderScheduleTable.apply(this, arguments);
+
+        // Add story checkboxes to each row
+        const tbody = schedTable.querySelector('tbody');
+        if (!tbody) return;
+
+        tbody.querySelectorAll('tr').forEach((row, idx) => {
+          if (row.querySelector('.story-checkbox-cell')) return;
+
+          const storyCell = document.createElement('td');
+          storyCell.className = 'story-checkbox-cell';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = true; // Default to checked
+          checkbox.dataset.idx = idx;
+          checkbox.title = 'Add story for this schedule item';
+
+          storyCell.appendChild(checkbox);
+
+          // Insert before last cell (actions)
+          const lastCell = row.lastElementChild;
+          row.insertBefore(storyCell, lastCell);
+        });
+      };
+      window.renderScheduleTable.__storyPatched = true;
+    }
+  }
+  enhanceScheduleModalWithStories();
+
+  /* ========== Course form reorganization ========== */
+  function reorganizeCourseForm() {
+    document.querySelectorAll('.course-section').forEach(section => {
+      if (section.dataset.reorganized) return;
+      section.dataset.reorganized = 'true';
+
+      const body = section.querySelector('.fs-body');
+      if (!body) return;
+
+      // Find existing schedule button
+      const schedBtn = body.querySelector('[id^="scheduleBtn_"]');
+      if (!schedBtn) return;
+
+      // Check if schedule area already exists
+      if (body.querySelector('.schedule-area')) return;
+
+      // Create schedule area at the bottom
+      const scheduleArea = document.createElement('div');
+      scheduleArea.className = 'schedule-area';
+      scheduleArea.innerHTML = `
+        <div class="schedule-box">
+          <div class="schedule-box-title">
+            <span class="icon course-schedule">📅</span>
+            Course Schedule
+          </div>
+          <div class="schedule-box-content" id="courseScheduleBox_${section.dataset.courseId}">
+            <p class="muted" style="font-size: 12px; margin: 0;">Configure course dates and schedule above, then sync to calendar.</p>
+          </div>
+        </div>
+        <div class="schedule-box">
+          <div class="schedule-box-title">
+            <span class="icon marketing-schedule">📢</span>
+            Marketing Schedule
+          </div>
+          <div class="schedule-box-content" id="marketingScheduleBox_${section.dataset.courseId}">
+            <p class="muted" style="font-size: 12px; margin: 0;">Auto-generated marketing tasks based on course timeline.</p>
+          </div>
+        </div>
+      `;
+
+      body.appendChild(scheduleArea);
+    });
+  }
+
+  // Hook into renderCourseSections to add course form reorganization
+  const _origRCS = window.renderCourseSections;
+  if (typeof _origRCS === 'function' && !_origRCS.__v29Patched) {
+    window.renderCourseSections = function() {
+      _origRCS.apply(this, arguments);
+      setTimeout(reorganizeCourseForm, 0);
+    };
+    window.renderCourseSections.__v29Patched = true;
+  }
+
+  // Run initial reorganization
+  setTimeout(reorganizeCourseForm, 200);
+
+  /* ========== Compute Range for 6-month view ========== */
+  const _origComputeRange = window.computeRange;
+  if (typeof _origComputeRange === 'function' && !_origComputeRange.__v29Patched) {
+    window.computeRange = function() {
+      if (window.timeMode === '6m') {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 6, 0);
+        return { start, end };
+      }
+      return _origComputeRange.apply(this, arguments);
+    };
+    window.computeRange.__v29Patched = true;
+  }
+
+})();
+</script>
+
 </body>
 </html>
