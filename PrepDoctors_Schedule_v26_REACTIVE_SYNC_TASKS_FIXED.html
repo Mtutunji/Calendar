@@ -720,6 +720,22 @@
 </div>
 </div>
 <div class="toolbar-section">
+<div class="toolbar-title">Filter</div>
+<button class="btn small" id="toolbarFilterBtn">Filter</button>
+</div>
+<div class="toolbar-section">
+<div class="toolbar-title">View Scope</div>
+<div class="select-wrap" style="min-width:120px;"><select id="viewScopeSelect">
+<option value="all">All</option>
+<option value="individual">Individual</option>
+<option value="team">Team</option>
+<option value="department">Department</option>
+<option value="company">Company Wide</option>
+<option value="course">Course</option>
+<option value="location">Location</option>
+</select></div>
+</div>
+<div class="toolbar-section">
 <div class="toolbar-title">Range</div>
 <div class="time-switch row" id="timeSwitch">
 <button class="btn small" data-t="day">Day</button>
@@ -743,7 +759,7 @@
 <table class="table" id="listTable">
 <thead>
 <tr>
-<th class="col-date">Date</th><th class="col-title">Title</th><th class="col-course">Course</th><th class="col-cycle">Cycle</th><th class="col-type">Type</th><th class="col-format">Format</th><th class="col-status">Status</th><th class="col-tag">Tag</th><th class="col-instructors">Instructors</th><th class="col-notes">Notes</th>
+<th class="col-date">Date</th><th class="col-title">Title</th><th class="col-course">Course</th><th class="col-cycle">Cycle</th><th class="col-type">Type</th><th class="col-format">Format</th><th class="col-status">Status</th><th class="col-tag">Tag</th><th class="col-viewscope">View Scope</th><th class="col-instructors">Instructors</th><th class="col-notes">Notes</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -1176,6 +1192,7 @@
 <div class="field"><label>Cycle</label><div class="mono" id="evvCycle"></div></div>
 <div class="field"><label>Status</label><div class="mono" id="evvStatus"></div></div>
 <div class="field"><label>Tag</label><div class="mono" id="evvTag"></div></div>
+<div class="field"><label>View Scope</label><div class="mono" id="evvViewScope"></div></div>
 <div class="field" style="grid-column:1/-1;"><label>Audiences</label><div class="mono" id="evvAud"></div></div>
 <div class="field" style="grid-column:1/-1;"><label>Notes</label><div class="mono" id="evvNotes"></div></div>
 </div>
@@ -1208,6 +1225,17 @@
 <input id="evConditionalChk" type="checkbox"/>
 <span class="slider"></span>
 </label>
+</div>
+<div class="field"><label>View Scope</label>
+<div class="select-wrap"><select id="evViewScope">
+<option value="">— (All)</option>
+<option value="individual">Individual</option>
+<option value="team">Team</option>
+<option value="department">Department</option>
+<option value="company">Company Wide</option>
+<option value="course">Course</option>
+<option value="location">Location</option>
+</select></div>
 </div>
 <div class="field" style="grid-column:1/-1;"><label>Assigned Instructor(s)</label><div class="ms" id="evInstrMS"></div></div>
 <div class="field" style="grid-column:1/-1;"><label>Audiences (Email only)</label><div class="ms" id="evAudMS"></div></div>
@@ -1252,17 +1280,53 @@
 </div>
 <div class="bd">
 <div class="form-section">
-<div class="fs-head"><div class="fs-title">Task Card Display</div></div>
+<div class="fs-head"><div class="fs-title">Task Card Display - Calendar View</div></div>
 <div class="form-grid">
-<div class="field"><label><input id="setShowCourse" type="checkbox"/> Show Course chip</label></div>
-<div class="field"><label><input id="setShowCycle" type="checkbox"/> Show Cycle chip</label></div>
-<div class="field"><label><input id="setShowType" type="checkbox"/> Show Type chip</label></div>
-<div class="field"><label><input id="setShowFormat" type="checkbox"/> Show Format chip</label></div>
-<div class="field"><label><input id="setShowTime" type="checkbox"/> Show Time (if available)</label></div>
-<div class="field"><label><input id="setShowInstructors" type="checkbox"/> Show Instructor(s)</label></div>
-<div class="field"><label><input id="setShowConditional" type="checkbox"/> Show "If applicable"</label></div>
-<div class="field"><label><input id="setShowGenTag" type="checkbox"/> Show Default/One‑Time tag</label></div>
-<div class="field"><label><input id="setShowStatus" type="checkbox"/> Show Status pill</label></div>
+<div class="field"><label><input id="setCalShowCourse" type="checkbox"/> Show Course chip</label></div>
+<div class="field"><label><input id="setCalShowCycle" type="checkbox"/> Show Cycle chip</label></div>
+<div class="field"><label><input id="setCalShowType" type="checkbox"/> Show Type chip</label></div>
+<div class="field"><label><input id="setCalShowFormat" type="checkbox"/> Show Format chip</label></div>
+<div class="field"><label><input id="setCalShowTime" type="checkbox"/> Show Time (if available)</label></div>
+<div class="field"><label><input id="setCalShowInstructors" type="checkbox"/> Show Instructor(s)</label></div>
+<div class="field"><label><input id="setCalShowConditional" type="checkbox"/> Show "If applicable"</label></div>
+<div class="field"><label><input id="setCalShowGenTag" type="checkbox"/> Show Default/One‑Time tag</label></div>
+<div class="field"><label><input id="setCalShowStatus" type="checkbox"/> Show Status pill</label></div>
+<div class="field"><label><input id="setCalShowViewScope" type="checkbox"/> Show View Scope</label></div>
+</div>
+</div>
+<div class="form-section">
+<div class="fs-head"><div class="fs-title">Task Card Display - List View</div></div>
+<div class="form-grid">
+<div class="field"><label><input id="setListShowCourse" type="checkbox"/> Show Course column</label></div>
+<div class="field"><label><input id="setListShowCycle" type="checkbox"/> Show Cycle column</label></div>
+<div class="field"><label><input id="setListShowType" type="checkbox"/> Show Type column</label></div>
+<div class="field"><label><input id="setListShowFormat" type="checkbox"/> Show Format column</label></div>
+<div class="field"><label><input id="setListShowStatus" type="checkbox"/> Show Status column</label></div>
+<div class="field"><label><input id="setListShowTag" type="checkbox"/> Show Tag column</label></div>
+<div class="field"><label><input id="setListShowInstructors" type="checkbox"/> Show Instructors column</label></div>
+<div class="field"><label><input id="setListShowNotes" type="checkbox"/> Show Notes column</label></div>
+<div class="field"><label><input id="setListShowViewScope" type="checkbox"/> Show View Scope column</label></div>
+</div>
+</div>
+<div class="form-section">
+<div class="fs-head"><div class="fs-title">Task Card Display - Kanban View</div></div>
+<div class="form-grid">
+<div class="field"><label><input id="setKbShowCourse" type="checkbox"/> Show Course chip</label></div>
+<div class="field"><label><input id="setKbShowDate" type="checkbox"/> Show Date chip</label></div>
+<div class="field"><label><input id="setKbShowTag" type="checkbox"/> Show Tag chip</label></div>
+<div class="field"><label><input id="setKbShowViewScope" type="checkbox"/> Show View Scope chip</label></div>
+</div>
+</div>
+<div class="form-section">
+<div class="fs-head"><div class="fs-title">View Scope Types</div></div>
+<div class="muted" style="margin-bottom:8px;">Configure which view scope options are available for tasks.</div>
+<div class="form-grid">
+<div class="field"><label><input id="setScopeIndividual" type="checkbox" checked/> Individual View</label></div>
+<div class="field"><label><input id="setScopeTeam" type="checkbox" checked/> Team View</label></div>
+<div class="field"><label><input id="setScopeDepartment" type="checkbox" checked/> Department View</label></div>
+<div class="field"><label><input id="setScopeCompany" type="checkbox" checked/> Company Wide View</label></div>
+<div class="field"><label><input id="setScopeCourse" type="checkbox" checked/> Course View</label></div>
+<div class="field"><label><input id="setScopeLocation" type="checkbox" checked/> Location View</label></div>
 </div>
 </div>
 <div class="form-section">
@@ -7176,6 +7240,623 @@ $('#saveAppSettings').onclick = ()=>{
 
   /* --- If the user is already on Schedule view, refresh immediately --- */
   try{ refreshAllViews({animate:false}); }catch(_e){}
+})();
+
+/* ===== PATCH v27: Per-View Card Display Customization, View Scope, and Filter Button ===== */
+(function(){
+  'use strict';
+
+  /* --- Default per-view settings --- */
+  const defaultViewSettings = {
+    calendar: {
+      showCourse: true, showCycle: true, showType: true, showFormat: true,
+      showTime: true, showInstructors: true, showConditional: true,
+      showGenTag: true, showStatus: true, showViewScope: false
+    },
+    list: {
+      showCourse: true, showCycle: true, showType: true, showFormat: true,
+      showStatus: true, showTag: true, showInstructors: true, showNotes: true,
+      showViewScope: false
+    },
+    kanban: {
+      showCourse: true, showDate: true, showTag: true, showViewScope: false
+    }
+  };
+
+  const defaultViewScopes = {
+    individual: true, team: true, department: true,
+    company: true, course: true, location: true
+  };
+
+  const viewScopeLabels = {
+    individual: 'Individual',
+    team: 'Team',
+    department: 'Department',
+    company: 'Company Wide',
+    course: 'Course',
+    location: 'Location'
+  };
+
+  /* --- Ensure Store has per-view settings --- */
+  function ensureViewSettings() {
+    if (!Store.appSettings) Store.appSettings = {};
+    if (!Store.appSettings.cardViews) {
+      Store.appSettings.cardViews = {
+        calendar: { ...defaultViewSettings.calendar },
+        list: { ...defaultViewSettings.list },
+        kanban: { ...defaultViewSettings.kanban }
+      };
+      // Migrate old card settings to calendar view
+      if (Store.appSettings.card) {
+        const old = Store.appSettings.card;
+        Store.appSettings.cardViews.calendar.showCourse = old.showCourse !== false;
+        Store.appSettings.cardViews.calendar.showCycle = old.showCycle !== false;
+        Store.appSettings.cardViews.calendar.showType = old.showType !== false;
+        Store.appSettings.cardViews.calendar.showFormat = old.showFormat !== false;
+        Store.appSettings.cardViews.calendar.showTime = old.showTime !== false;
+        Store.appSettings.cardViews.calendar.showInstructors = old.showInstructors !== false;
+        Store.appSettings.cardViews.calendar.showConditional = old.showConditional !== false;
+        Store.appSettings.cardViews.calendar.showGenTag = old.showGenTag !== false;
+        Store.appSettings.cardViews.calendar.showStatus = old.showStatus !== false;
+      }
+    }
+    if (!Store.appSettings.viewScopes) {
+      Store.appSettings.viewScopes = { ...defaultViewScopes };
+    }
+    return Store.appSettings;
+  }
+
+  function getCalendarCardSettings() {
+    ensureViewSettings();
+    return Store.appSettings.cardViews.calendar || defaultViewSettings.calendar;
+  }
+
+  function getListCardSettings() {
+    ensureViewSettings();
+    return Store.appSettings.cardViews.list || defaultViewSettings.list;
+  }
+
+  function getKanbanCardSettings() {
+    ensureViewSettings();
+    return Store.appSettings.cardViews.kanban || defaultViewSettings.kanban;
+  }
+
+  function getViewScopes() {
+    ensureViewSettings();
+    return Store.appSettings.viewScopes || defaultViewScopes;
+  }
+
+  /* --- Current view scope filter --- */
+  let currentViewScope = 'all';
+
+  const viewScopeSelect = document.getElementById('viewScopeSelect');
+  if (viewScopeSelect) {
+    viewScopeSelect.onchange = function() {
+      currentViewScope = this.value;
+      refreshAllViews({ animate: false });
+    };
+  }
+
+  /* --- Toolbar Filter Button --- */
+  const toolbarFilterBtn = document.getElementById('toolbarFilterBtn');
+  if (toolbarFilterBtn) {
+    toolbarFilterBtn.onclick = function() {
+      if (typeof renderFilterModal === 'function') {
+        renderFilterModal();
+      }
+    };
+  }
+
+  /* --- Update passFilter to include view scope --- */
+  const _originalPassFilter = window.passFilter;
+  function passFilterWithViewScope(ev) {
+    // First check view scope
+    if (currentViewScope !== 'all') {
+      const evScope = ev.viewScope || '';
+      if (evScope !== currentViewScope) return false;
+    }
+    // Then call original filter if it exists or return true
+    if (typeof _originalPassFilter === 'function') {
+      return _originalPassFilter(ev);
+    }
+    return true;
+  }
+
+  /* --- Patch filteredEventsInRange to use view scope filter --- */
+  const _originalFilteredEventsInRange = window.filteredEventsInRange;
+  window.filteredEventsInRange = function() {
+    const y = yearData();
+    const range = computeRange();
+    const start = range.start, end = range.end;
+    const cur = Store.filters.current || {};
+
+    function pass(ev) {
+      const d = parseDate(ev.date);
+      if (d < start || d > end) return false;
+      if (cur.courses && cur.courses.length && !cur.courses.includes(ev.courseId)) return false;
+      if (cur.types && cur.types.length && !cur.types.includes(ev.type)) return false;
+      if (cur.status && cur.status.length && !cur.status.includes(ev.status)) return false;
+      if (cur.defaultOne) {
+        const allowDefault = !!cur.defaultOne.default;
+        const allowOne = !!cur.defaultOne.one;
+        const tag = (ev.generated && ev.genSource === 'default') ? 'default' : (ev.generated ? ev.genSource : null);
+        if (tag === 'default' && !allowDefault) return false;
+        if (tag === 'one' && !allowOne) return false;
+      }
+      if (cur.instructors && cur.instructors.length) {
+        const ins = ev.instructors || [];
+        if (!ins.some(x => cur.instructors.includes(x))) return false;
+      }
+      // View scope filter
+      if (currentViewScope !== 'all') {
+        const evScope = ev.viewScope || '';
+        if (evScope !== currentViewScope) return false;
+      }
+      return true;
+    }
+    return y.events.filter(pass).sort((a, b) => a.date.localeCompare(b.date));
+  };
+
+  /* --- Patch renderListView to use per-view settings and add view scope column --- */
+  const _originalRenderListView = window.renderListView;
+  window.renderListView = function() {
+    const tb = document.querySelector('#listTable tbody');
+    if (!tb) return;
+    tb.innerHTML = '';
+    const headRow = document.querySelector('#listTable thead tr');
+    const listSettings = getListCardSettings();
+
+    filteredEventsInRange().forEach(ev => {
+      const tag = (ev.generated && ev.genSource === 'default') ? 'Default' : ((ev.generated || ev.genSource === 'one') ? 'One‑Time' : 'Manual');
+      const names = (ev.instructors || []).map(id => Store.instructors.find(i => i.id === id)?.name || id).join(', ');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-id', ev.id);
+
+      // Build cells
+      const tdDate = document.createElement('td'); tdDate.className = 'col-date'; tdDate.textContent = ev.date;
+      const tdTitle = document.createElement('td'); tdTitle.className = 'col-title'; tdTitle.textContent = ev.title;
+      const tdCourse = document.createElement('td'); tdCourse.className = 'col-course'; tdCourse.textContent = courseLabel(ev.courseId);
+      const tdCycle = document.createElement('td'); tdCycle.className = 'col-cycle'; tdCycle.textContent = ev.cycleIndex || '';
+      const tdType = document.createElement('td'); tdType.className = 'col-type'; tdType.textContent = ev.type;
+      const tdFormat = document.createElement('td'); tdFormat.className = 'col-format'; tdFormat.textContent = ev.format || '';
+
+      // Status cell
+      const tdStatus = document.createElement('td'); tdStatus.className = 'col-status';
+      const sel = document.createElement('select');
+      getStatuses().forEach(s => {
+        const o = document.createElement('option'); o.value = s.key; o.textContent = s.label; sel.appendChild(o);
+      });
+      sel.value = ev.status || 'planned';
+      sel.onchange = () => {
+        ev.status = sel.value;
+        scheduleAutosave();
+        refreshAllViews({ animate: true });
+      };
+      const sset = statusByKey(sel.value);
+      tdStatus.style.background = sset.bg;
+      tdStatus.style.borderLeft = '4px solid ' + (sset.bd || '#cbd5e1');
+      tdStatus.appendChild(sel);
+
+      const tdTag = document.createElement('td'); tdTag.className = 'col-tag'; tdTag.textContent = tag;
+      const tdViewScope = document.createElement('td'); tdViewScope.className = 'col-viewscope'; tdViewScope.textContent = viewScopeLabels[ev.viewScope] || '—';
+      const tdInstr = document.createElement('td'); tdInstr.className = 'col-instructors'; tdInstr.textContent = names;
+      const tdNotes = document.createElement('td'); tdNotes.className = 'col-notes'; tdNotes.textContent = ev.notes || '';
+
+      [tdDate, tdTitle, tdCourse, tdCycle, tdType, tdFormat, tdStatus, tdTag, tdViewScope, tdInstr, tdNotes].forEach(td => tr.appendChild(td));
+
+      // Drag-and-drop
+      tr.draggable = (ev.type !== 'Schedule');
+      if (tr.draggable) {
+        tr.addEventListener('dragstart', (e) => {
+          dragActive = true;
+          onDragStart(e);
+        });
+        tr.addEventListener('dragend', () => {
+          dragId = null;
+          tr.classList.remove('dragging');
+          setTimeout(() => { dragActive = false; }, 0);
+        });
+      }
+      tr.addEventListener('dragover', (e) => {
+        if (!dragId) return;
+        e.preventDefault();
+        tr.classList.add('list-drop-over');
+      });
+      tr.addEventListener('dragleave', () => tr.classList.remove('list-drop-over'));
+      tr.addEventListener('drop', (e) => {
+        e.preventDefault();
+        tr.classList.remove('list-drop-over');
+        const id = dragId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+        if (!id || id === ev.id) return;
+        const y = yearData();
+        const dragged = y.events.find(x => x.id === id);
+        if (!dragged || dragged.type === 'Schedule') return;
+        dragged.date = ev.date;
+        markDirty(dragged.courseId);
+        scheduleAutosave();
+        refreshAllViews({ animate: true });
+      });
+
+      tr.onclick = (e) => { if (dragActive) return; if (e.target.tagName.toLowerCase() === 'select') return; openEventModal(ev.id); };
+      tb.appendChild(tr);
+    });
+
+    updateListColumnVisibilityWithSettings();
+  };
+
+  /* --- Update list column visibility based on per-view settings --- */
+  function updateListColumnVisibilityWithSettings() {
+    const listSettings = getListCardSettings();
+    const table = document.getElementById('listTable');
+    if (!table) return;
+
+    // Hide/show columns based on settings
+    const hideColumn = (className, shouldHide) => {
+      table.querySelectorAll('.' + className).forEach(el => {
+        el.style.display = shouldHide ? 'none' : '';
+      });
+      const th = table.querySelector('th.' + className);
+      if (th) th.style.display = shouldHide ? 'none' : '';
+    };
+
+    hideColumn('col-course', !listSettings.showCourse);
+    hideColumn('col-cycle', !listSettings.showCycle);
+    hideColumn('col-type', !listSettings.showType);
+    hideColumn('col-format', !listSettings.showFormat);
+    hideColumn('col-status', !listSettings.showStatus);
+    hideColumn('col-tag', !listSettings.showTag);
+    hideColumn('col-viewscope', !listSettings.showViewScope);
+    hideColumn('col-instructors', !listSettings.showInstructors);
+    hideColumn('col-notes', !listSettings.showNotes);
+  }
+
+  /* --- Patch renderKanban to use per-view settings --- */
+  const _originalRenderKanban = window.renderKanban;
+  window.renderKanban = function() {
+    const wrap = document.getElementById('kbWrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const kbSettings = getKanbanCardSettings();
+    const groups = {};
+    getStatuses().forEach(s => groups[s.key] = []);
+    filteredEventsInRange().forEach(ev => {
+      if (!groups[ev.status]) groups[ev.status] = [];
+      groups[ev.status].push(ev);
+    });
+    getStatuses().forEach(st => {
+      const col = document.createElement('div'); col.className = 'kb-col';
+      col.innerHTML = `<div class="kb-head">${st.label} <span class="muted">(${(groups[st.key] || []).length})</span></div><div class="kb-body" data-status="${st.key}"></div>`;
+      const body = col.querySelector('.kb-body');
+      (groups[st.key] || []).forEach(ev => {
+        const card = document.createElement('div'); card.className = 'event'; card.setAttribute('data-id', ev.id); card.draggable = (ev.type !== 'Schedule');
+        const sset = statusByKey(ev.status || 'planned'); card.style.background = sset.bg; card.style.borderColor = sset.bd;
+        const tag = (ev.generated && ev.genSource === 'default') ? 'Default' : ((ev.generated || ev.genSource === 'one') ? 'One‑Time' : 'Manual');
+
+        // Build chips based on settings
+        const chips = [];
+        if (kbSettings.showDate) chips.push(`<div class="chip">${ev.date}</div>`);
+        if (kbSettings.showCourse) chips.push(`<div class="chip">${courseLabel(ev.courseId)}</div>`);
+        if (kbSettings.showTag) chips.push(`<div class="chip">${tag}</div>`);
+        if (kbSettings.showViewScope && ev.viewScope) chips.push(`<div class="chip">${viewScopeLabels[ev.viewScope] || ev.viewScope}</div>`);
+
+        card.innerHTML = `<div class="title">${ev.title}</div><div class="chips">${chips.join('')}</div>`;
+        try { const cd = getCourseById(ev.courseId); card.style.borderLeft = `4px solid ${cd?.color || '#CBD5E1'}`; } catch (_e) {}
+        card.ondragstart = (e) => {
+          dragActive = true;
+          dragId = ev.id;
+          if (e.dataTransfer) {
+            e.dataTransfer.setData('text/plain', dragId);
+            try { e.dataTransfer.effectAllowed = 'move'; } catch (_e) {}
+          }
+          card.classList.add('dragging');
+        };
+        card.ondragend = () => {
+          dragId = null;
+          card.classList.remove('dragging');
+          setTimeout(() => { dragActive = false; }, 0);
+        };
+        card.onclick = () => { if (dragActive) return; openEventModal(ev.id); };
+        body.appendChild(card);
+      });
+      // DnD
+      body.ondragover = (e) => { e.preventDefault(); body.classList.add('over'); };
+      body.ondragleave = () => body.classList.remove('over');
+      body.ondrop = (e) => {
+        e.preventDefault(); body.classList.remove('over');
+        const id = dragId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+        if (!id) return;
+        const y = yearData(); const ev = y.events.find(x => x.id === id); if (!ev || ev.type === 'Schedule') return;
+        ev.status = body.getAttribute('data-status');
+        markDirty(ev.courseId);
+        scheduleAutosave();
+        refreshAllViews({ animate: true });
+        setTimeout(() => { dragId = null; dragActive = false; }, 0);
+      };
+      wrap.appendChild(col);
+    });
+  };
+
+  /* --- Patch openEventModal to handle view scope --- */
+  const _originalOpenEventModal = window.openEventModal;
+  window.openEventModal = function(id) {
+    _originalOpenEventModal(id);
+
+    const y = yearData();
+    const ev = y.events.find(e => e.id === id);
+    if (!ev) return;
+
+    // Update view scope display
+    const evvViewScope = document.getElementById('evvViewScope');
+    if (evvViewScope) {
+      evvViewScope.textContent = viewScopeLabels[ev.viewScope] || '—';
+    }
+
+    // Update view scope select in edit form
+    const evViewScope = document.getElementById('evViewScope');
+    if (evViewScope) {
+      evViewScope.value = ev.viewScope || '';
+    }
+
+    // Patch save handler to include view scope
+    const saveBtn = document.getElementById('evSave');
+    if (saveBtn) {
+      const origOnClick = saveBtn.onclick;
+      saveBtn.onclick = function() {
+        const viewScopeSel = document.getElementById('evViewScope');
+        if (viewScopeSel) {
+          ev.viewScope = viewScopeSel.value || '';
+        }
+        if (typeof origOnClick === 'function') {
+          origOnClick.call(this);
+        }
+      };
+    }
+  };
+
+  /* --- Patch createQuickEvent to handle view scope --- */
+  const _originalCreateQuickEvent = window.createQuickEvent;
+  window.createQuickEvent = function(date) {
+    _originalCreateQuickEvent(date);
+
+    // Ensure view scope select is initialized
+    const evViewScope = document.getElementById('evViewScope');
+    if (evViewScope) {
+      evViewScope.value = '';
+    }
+  };
+
+  /* --- Update App Settings Modal handlers --- */
+  const appSettingsBtn = document.getElementById('appSettingsBtn');
+  if (appSettingsBtn) {
+    const origOnClick = appSettingsBtn.onclick;
+    appSettingsBtn.onclick = function() {
+      ensureViewSettings();
+      const calSettings = getCalendarCardSettings();
+      const listSettings = getListCardSettings();
+      const kbSettings = getKanbanCardSettings();
+      const scopes = getViewScopes();
+
+      // Calendar view settings
+      const setCalShowCourse = document.getElementById('setCalShowCourse');
+      if (setCalShowCourse) setCalShowCourse.checked = calSettings.showCourse !== false;
+      const setCalShowCycle = document.getElementById('setCalShowCycle');
+      if (setCalShowCycle) setCalShowCycle.checked = calSettings.showCycle !== false;
+      const setCalShowType = document.getElementById('setCalShowType');
+      if (setCalShowType) setCalShowType.checked = calSettings.showType !== false;
+      const setCalShowFormat = document.getElementById('setCalShowFormat');
+      if (setCalShowFormat) setCalShowFormat.checked = calSettings.showFormat !== false;
+      const setCalShowTime = document.getElementById('setCalShowTime');
+      if (setCalShowTime) setCalShowTime.checked = calSettings.showTime !== false;
+      const setCalShowInstructors = document.getElementById('setCalShowInstructors');
+      if (setCalShowInstructors) setCalShowInstructors.checked = calSettings.showInstructors !== false;
+      const setCalShowConditional = document.getElementById('setCalShowConditional');
+      if (setCalShowConditional) setCalShowConditional.checked = calSettings.showConditional !== false;
+      const setCalShowGenTag = document.getElementById('setCalShowGenTag');
+      if (setCalShowGenTag) setCalShowGenTag.checked = calSettings.showGenTag !== false;
+      const setCalShowStatus = document.getElementById('setCalShowStatus');
+      if (setCalShowStatus) setCalShowStatus.checked = calSettings.showStatus !== false;
+      const setCalShowViewScope = document.getElementById('setCalShowViewScope');
+      if (setCalShowViewScope) setCalShowViewScope.checked = calSettings.showViewScope === true;
+
+      // List view settings
+      const setListShowCourse = document.getElementById('setListShowCourse');
+      if (setListShowCourse) setListShowCourse.checked = listSettings.showCourse !== false;
+      const setListShowCycle = document.getElementById('setListShowCycle');
+      if (setListShowCycle) setListShowCycle.checked = listSettings.showCycle !== false;
+      const setListShowType = document.getElementById('setListShowType');
+      if (setListShowType) setListShowType.checked = listSettings.showType !== false;
+      const setListShowFormat = document.getElementById('setListShowFormat');
+      if (setListShowFormat) setListShowFormat.checked = listSettings.showFormat !== false;
+      const setListShowStatus = document.getElementById('setListShowStatus');
+      if (setListShowStatus) setListShowStatus.checked = listSettings.showStatus !== false;
+      const setListShowTag = document.getElementById('setListShowTag');
+      if (setListShowTag) setListShowTag.checked = listSettings.showTag !== false;
+      const setListShowInstructors = document.getElementById('setListShowInstructors');
+      if (setListShowInstructors) setListShowInstructors.checked = listSettings.showInstructors !== false;
+      const setListShowNotes = document.getElementById('setListShowNotes');
+      if (setListShowNotes) setListShowNotes.checked = listSettings.showNotes !== false;
+      const setListShowViewScope = document.getElementById('setListShowViewScope');
+      if (setListShowViewScope) setListShowViewScope.checked = listSettings.showViewScope === true;
+
+      // Kanban view settings
+      const setKbShowCourse = document.getElementById('setKbShowCourse');
+      if (setKbShowCourse) setKbShowCourse.checked = kbSettings.showCourse !== false;
+      const setKbShowDate = document.getElementById('setKbShowDate');
+      if (setKbShowDate) setKbShowDate.checked = kbSettings.showDate !== false;
+      const setKbShowTag = document.getElementById('setKbShowTag');
+      if (setKbShowTag) setKbShowTag.checked = kbSettings.showTag !== false;
+      const setKbShowViewScope = document.getElementById('setKbShowViewScope');
+      if (setKbShowViewScope) setKbShowViewScope.checked = kbSettings.showViewScope === true;
+
+      // View scope settings
+      const setScopeIndividual = document.getElementById('setScopeIndividual');
+      if (setScopeIndividual) setScopeIndividual.checked = scopes.individual !== false;
+      const setScopeTeam = document.getElementById('setScopeTeam');
+      if (setScopeTeam) setScopeTeam.checked = scopes.team !== false;
+      const setScopeDepartment = document.getElementById('setScopeDepartment');
+      if (setScopeDepartment) setScopeDepartment.checked = scopes.department !== false;
+      const setScopeCompany = document.getElementById('setScopeCompany');
+      if (setScopeCompany) setScopeCompany.checked = scopes.company !== false;
+      const setScopeCourse = document.getElementById('setScopeCourse');
+      if (setScopeCourse) setScopeCourse.checked = scopes.course !== false;
+      const setScopeLocation = document.getElementById('setScopeLocation');
+      if (setScopeLocation) setScopeLocation.checked = scopes.location !== false;
+
+      // Also handle legacy settings for backwards compatibility
+      const setShowCourse = document.getElementById('setShowCourse');
+      if (setShowCourse) setShowCourse.checked = calSettings.showCourse !== false;
+      const setShowCycle = document.getElementById('setShowCycle');
+      if (setShowCycle) setShowCycle.checked = calSettings.showCycle !== false;
+      const setShowType = document.getElementById('setShowType');
+      if (setShowType) setShowType.checked = calSettings.showType !== false;
+      const setShowFormat = document.getElementById('setShowFormat');
+      if (setShowFormat) setShowFormat.checked = calSettings.showFormat !== false;
+      const setShowTime = document.getElementById('setShowTime');
+      if (setShowTime) setShowTime.checked = calSettings.showTime !== false;
+      const setShowInstructors = document.getElementById('setShowInstructors');
+      if (setShowInstructors) setShowInstructors.checked = calSettings.showInstructors !== false;
+      const setShowConditional = document.getElementById('setShowConditional');
+      if (setShowConditional) setShowConditional.checked = calSettings.showConditional !== false;
+      const setShowGenTag = document.getElementById('setShowGenTag');
+      if (setShowGenTag) setShowGenTag.checked = calSettings.showGenTag !== false;
+      const setShowStatus = document.getElementById('setShowStatus');
+      if (setShowStatus) setShowStatus.checked = calSettings.showStatus !== false;
+
+      if (typeof renderStatusTable === 'function') renderStatusTable();
+      showModal('appSettingsModal');
+    };
+  }
+
+  /* --- Update Save App Settings handler --- */
+  const saveAppSettingsBtn = document.getElementById('saveAppSettings');
+  if (saveAppSettingsBtn) {
+    saveAppSettingsBtn.onclick = function() {
+      ensureViewSettings();
+
+      // Save Calendar view settings
+      Store.appSettings.cardViews.calendar = {
+        showCourse: !!document.getElementById('setCalShowCourse')?.checked,
+        showCycle: !!document.getElementById('setCalShowCycle')?.checked,
+        showType: !!document.getElementById('setCalShowType')?.checked,
+        showFormat: !!document.getElementById('setCalShowFormat')?.checked,
+        showTime: !!document.getElementById('setCalShowTime')?.checked,
+        showInstructors: !!document.getElementById('setCalShowInstructors')?.checked,
+        showConditional: !!document.getElementById('setCalShowConditional')?.checked,
+        showGenTag: !!document.getElementById('setCalShowGenTag')?.checked,
+        showStatus: !!document.getElementById('setCalShowStatus')?.checked,
+        showViewScope: !!document.getElementById('setCalShowViewScope')?.checked
+      };
+
+      // Save List view settings
+      Store.appSettings.cardViews.list = {
+        showCourse: !!document.getElementById('setListShowCourse')?.checked,
+        showCycle: !!document.getElementById('setListShowCycle')?.checked,
+        showType: !!document.getElementById('setListShowType')?.checked,
+        showFormat: !!document.getElementById('setListShowFormat')?.checked,
+        showStatus: !!document.getElementById('setListShowStatus')?.checked,
+        showTag: !!document.getElementById('setListShowTag')?.checked,
+        showInstructors: !!document.getElementById('setListShowInstructors')?.checked,
+        showNotes: !!document.getElementById('setListShowNotes')?.checked,
+        showViewScope: !!document.getElementById('setListShowViewScope')?.checked
+      };
+
+      // Save Kanban view settings
+      Store.appSettings.cardViews.kanban = {
+        showCourse: !!document.getElementById('setKbShowCourse')?.checked,
+        showDate: !!document.getElementById('setKbShowDate')?.checked,
+        showTag: !!document.getElementById('setKbShowTag')?.checked,
+        showViewScope: !!document.getElementById('setKbShowViewScope')?.checked
+      };
+
+      // Save View scope settings
+      Store.appSettings.viewScopes = {
+        individual: !!document.getElementById('setScopeIndividual')?.checked,
+        team: !!document.getElementById('setScopeTeam')?.checked,
+        department: !!document.getElementById('setScopeDepartment')?.checked,
+        company: !!document.getElementById('setScopeCompany')?.checked,
+        course: !!document.getElementById('setScopeCourse')?.checked,
+        location: !!document.getElementById('setScopeLocation')?.checked
+      };
+
+      // Also maintain backwards compatibility with legacy card settings
+      Store.appSettings.card = {
+        showCourse: Store.appSettings.cardViews.calendar.showCourse,
+        showCycle: Store.appSettings.cardViews.calendar.showCycle,
+        showType: Store.appSettings.cardViews.calendar.showType,
+        showFormat: Store.appSettings.cardViews.calendar.showFormat,
+        showTime: Store.appSettings.cardViews.calendar.showTime,
+        showInstructors: Store.appSettings.cardViews.calendar.showInstructors,
+        showConditional: Store.appSettings.cardViews.calendar.showConditional,
+        showGenTag: Store.appSettings.cardViews.calendar.showGenTag,
+        showStatus: Store.appSettings.cardViews.calendar.showStatus
+      };
+
+      // Update view scope dropdown based on settings
+      updateViewScopeDropdown();
+
+      scheduleAutosave();
+      hideModal('appSettingsModal');
+      renderCalendar();
+      try { updateGenerateButtons(); } catch (_e) {}
+    };
+  }
+
+  /* --- Update View Scope dropdown options based on settings --- */
+  function updateViewScopeDropdown() {
+    const viewScopeSelect = document.getElementById('viewScopeSelect');
+    if (!viewScopeSelect) return;
+
+    const scopes = getViewScopes();
+    viewScopeSelect.innerHTML = '<option value="all">All</option>';
+
+    if (scopes.individual) viewScopeSelect.innerHTML += '<option value="individual">Individual</option>';
+    if (scopes.team) viewScopeSelect.innerHTML += '<option value="team">Team</option>';
+    if (scopes.department) viewScopeSelect.innerHTML += '<option value="department">Department</option>';
+    if (scopes.company) viewScopeSelect.innerHTML += '<option value="company">Company Wide</option>';
+    if (scopes.course) viewScopeSelect.innerHTML += '<option value="course">Course</option>';
+    if (scopes.location) viewScopeSelect.innerHTML += '<option value="location">Location</option>';
+  }
+
+  /* --- Update task view scope dropdown options based on settings --- */
+  function updateTaskViewScopeDropdown() {
+    const evViewScope = document.getElementById('evViewScope');
+    if (!evViewScope) return;
+
+    const scopes = getViewScopes();
+    evViewScope.innerHTML = '<option value="">— (All)</option>';
+
+    if (scopes.individual) evViewScope.innerHTML += '<option value="individual">Individual</option>';
+    if (scopes.team) evViewScope.innerHTML += '<option value="team">Team</option>';
+    if (scopes.department) evViewScope.innerHTML += '<option value="department">Department</option>';
+    if (scopes.company) evViewScope.innerHTML += '<option value="company">Company Wide</option>';
+    if (scopes.course) evViewScope.innerHTML += '<option value="course">Course</option>';
+    if (scopes.location) evViewScope.innerHTML += '<option value="location">Location</option>';
+  }
+
+  /* --- Patch buildDayCell to use calendar-specific settings --- */
+  // This requires patching the renderCalendarGrid function
+  const _originalRenderCalendarGrid = window.renderCalendarGrid;
+  if (typeof _originalRenderCalendarGrid === 'function') {
+    window.renderCalendarGrid = function() {
+      // Temporarily override Store.appSettings.card with calendar-specific settings
+      const calSettings = getCalendarCardSettings();
+      const originalCard = Store.appSettings.card;
+      Store.appSettings.card = calSettings;
+
+      _originalRenderCalendarGrid();
+
+      // Restore original
+      Store.appSettings.card = originalCard;
+    };
+  }
+
+  /* --- Initialize on load --- */
+  try {
+    ensureViewSettings();
+    updateViewScopeDropdown();
+    updateTaskViewScopeDropdown();
+  } catch (_e) {}
+
 })();
 </script>
 
