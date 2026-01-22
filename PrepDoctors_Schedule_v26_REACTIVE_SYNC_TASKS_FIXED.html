@@ -9435,5 +9435,1133 @@ $('#saveAppSettings').onclick = ()=>{
 })();
 </script>
 
+<!-- === PATCH v30: Reset Calendar, Marketing Templates, Client Journey, UI Clarity === -->
+<style>
+/* Reset Calendar Button */
+.btn-reset-calendar {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-reset-calendar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Marketing Templates Section */
+.marketing-templates-section {
+  background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+  border: 2px solid #86EFAC;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+}
+.marketing-templates-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.marketing-templates-section .section-title {
+  font-weight: 900;
+  font-size: 16px;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.marketing-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.marketing-template-card {
+  background: #fff;
+  border: 1px solid #D1FAE5;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.marketing-template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.15);
+  border-color: #10B981;
+}
+.marketing-template-card.selected {
+  background: #DCFCE7;
+  border-color: #10B981;
+  outline: 2px solid #10B981;
+}
+.marketing-template-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.marketing-template-card .card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: #F0FDF4;
+}
+.marketing-template-card .card-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+.marketing-template-card .card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.marketing-template-card .stat-pill {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #F1F5F9;
+  color: #475569;
+}
+.marketing-template-card .stat-pill.email { background: #EFF6FF; color: #1D4ED8; }
+.marketing-template-card .stat-pill.social { background: #F5F3FF; color: #7C3AED; }
+.marketing-template-card .stat-pill.story { background: #FDF4FF; color: #A21CAF; }
+.marketing-template-card .stat-pill.ad { background: #FEF3C7; color: #B45309; }
+
+/* Client Journey Section */
+.client-journey-section {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid #93C5FD;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+}
+.client-journey-section .section-title {
+  font-weight: 900;
+  font-size: 16px;
+  color: #1E40AF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.journey-phases {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.journey-phase {
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 14px;
+  position: relative;
+}
+.journey-phase::after {
+  content: '→';
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #60A5FA;
+  font-weight: 900;
+}
+.journey-phase:last-child::after {
+  display: none;
+}
+.journey-phase .phase-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.journey-phase .phase-icon.sales { background: #DBEAFE; }
+.journey-phase .phase-icon.ops { background: #D1FAE5; }
+.journey-phase .phase-title {
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.journey-phase .phase-tasks {
+  font-size: 12px;
+  color: #64748B;
+}
+.journey-phase .phase-tasks li {
+  margin: 4px 0;
+  padding-left: 14px;
+  position: relative;
+}
+.journey-phase .phase-tasks li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #3B82F6;
+  font-weight: 900;
+}
+
+/* Quick Actions Bar */
+.quick-actions-bar {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #F8FAFC;
+  border: 1px solid var(--prepx-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.quick-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  background: #fff;
+}
+.quick-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.quick-action-btn.primary {
+  background: var(--prepx-secondary);
+  color: #fff;
+}
+.quick-action-btn.danger {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+.quick-action-btn .icon {
+  font-size: 16px;
+}
+
+/* Clear UI improvements */
+.calendar-wrap.card {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+.day-grid {
+  gap: 8px;
+}
+.day {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+.day:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.event {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Feature Access Panel */
+.feature-access-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 16px;
+  background: #FAFBFC;
+  border: 1px solid var(--prepx-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.feature-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--prepx-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+.feature-btn:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.feature-btn .icon {
+  font-size: 24px;
+}
+.feature-btn .label {
+  font-weight: 700;
+  font-size: 12px;
+  color: #374151;
+}
+
+/* Reset Confirmation Modal */
+#resetModal .warning-box {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+}
+#resetModal .warning-box .warning-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+#resetModal .warning-text {
+  font-weight: 600;
+  color: #991B1B;
+}
+</style>
+
+<script>
+/* === PATCH v30 JavaScript === */
+(function() {
+  'use strict';
+
+  /* ========== Marketing Schedule Templates ========== */
+  const MARKETING_TEMPLATES = {
+    'AFK': {
+      name: 'AFK Marketing Schedule',
+      emails: [
+        { offset: -150, anchor: 'courseStart', title: 'AFK Email 1', description: '5 months before course starts' },
+        { offset: -120, anchor: 'courseStart', title: 'AFK Email 2', description: '4 months before course starts' },
+        { offset: -90, anchor: 'courseStart', title: 'AFK Email 3', description: '3 months before course starts' },
+        { offset: -60, anchor: 'courseStart', title: 'AFK Email 4', description: '2 months before course starts' },
+        { offset: -30, anchor: 'courseStart', title: 'AFK Email 5', description: '1 month before course starts' },
+        { offset: -14, anchor: 'courseStart', title: 'AFK Email 6', description: '2 weeks before course starts' },
+        { offset: -7, anchor: 'courseStart', title: 'AFK Email 7', description: '1 week before course starts' }
+      ],
+      socialMedia: [
+        { offset: -150, anchor: 'courseStart', title: 'AFK Social Media Video 1', description: '5 months before course starts', format: 'Video' },
+        { offset: -120, anchor: 'courseStart', title: 'AFK Social Media Video 2', description: '4 months before course starts', format: 'Video' },
+        { offset: -90, anchor: 'courseStart', title: 'AFK Social Media Video 3', description: '3 months before course starts', format: 'Video' },
+        { offset: -60, anchor: 'courseStart', title: 'AFK Social Media Video 4', description: '2 months before course starts', format: 'Video' },
+        { offset: -45, anchor: 'courseStart', title: 'AFK Social Media Video 5', description: '1.5 months before course starts', format: 'Video' },
+        { offset: -30, anchor: 'courseStart', title: 'AFK Social Media Video 6', description: '1 month before course starts', format: 'Video' },
+        { offset: -14, anchor: 'courseStart', title: 'AFK Social Media Video 7', description: '2 weeks before course starts', format: 'Video' }
+      ],
+      stories: [
+        { offset: -90, anchor: 'courseStart', title: 'AFK Story', description: '3 months before course starts', format: 'Story' }
+      ],
+      ads: [
+        { offset: -90, anchor: 'courseStart', title: 'AFK Social Media Ad', description: '3 months before - Runs Until Course Start', duration: 90, format: 'Ad' }
+      ]
+    },
+    'ACJ': {
+      name: 'ACJ Marketing Schedule',
+      emails: [
+        { offset: -120, anchor: 'courseStart', title: 'ACJ Email 1', description: '4 months before course starts' },
+        { offset: -90, anchor: 'courseStart', title: 'ACJ Email 2', description: '3 months before course starts' },
+        { offset: -60, anchor: 'courseStart', title: 'ACJ Email 3', description: '2 months before course starts' },
+        { offset: -30, anchor: 'courseStart', title: 'ACJ Email 4', description: '1 month before course starts' },
+        { offset: -7, anchor: 'courseStart', title: 'ACJ Email 5', description: '1 week before course starts' }
+      ],
+      socialMedia: [
+        { offset: -120, anchor: 'courseStart', title: 'ACJ Social Media Video 1', description: '4 months before course starts', format: 'Video' },
+        { offset: -105, anchor: 'courseStart', title: 'ACJ Social Media Video 2', description: '3.5 months before course starts', format: 'Video' },
+        { offset: -90, anchor: 'courseStart', title: 'ACJ Social Media Video 3', description: '3 months before course starts', format: 'Video' },
+        { offset: -75, anchor: 'courseStart', title: 'ACJ Social Media Video 4', description: '2.5 months before course starts', format: 'Video' },
+        { offset: -60, anchor: 'courseStart', title: 'ACJ Social Media Video 5', description: '2 months before course starts', format: 'Video' },
+        { offset: -45, anchor: 'courseStart', title: 'ACJ Social Media Video 6', description: '1.5 months before course starts', format: 'Video' },
+        { offset: -30, anchor: 'courseStart', title: 'ACJ Social Media Video 7', description: '1 month before course starts', format: 'Video' },
+        { offset: -14, anchor: 'courseStart', title: 'ACJ Social Media Video 8', description: '2 weeks before course starts', format: 'Video' }
+      ],
+      stories: [
+        { offset: -60, anchor: 'courseStart', title: 'ACJ Story', description: '2 months before course starts', format: 'Story' }
+      ],
+      ads: [
+        { offset: -90, anchor: 'courseStart', title: 'ACJ Social Media Ad', description: '3 months before - Runs Until Course Start', duration: 90, format: 'Ad' }
+      ]
+    },
+    'NDECC': {
+      name: 'NDECC Marketing Schedule',
+      emails: [
+        { offset: -150, anchor: 'courseStart', title: 'NDECC Email 1', description: '5 months before course starts' },
+        { offset: -120, anchor: 'courseStart', title: 'NDECC Email 2', description: '4 months before course starts' },
+        { offset: -90, anchor: 'courseStart', title: 'NDECC Email 3', description: '3 months before course starts' },
+        { offset: -60, anchor: 'courseStart', title: 'NDECC Email 4', description: '2 months before course starts' },
+        { offset: -30, anchor: 'courseStart', title: 'NDECC Email 5', description: '1 month before course starts' },
+        { offset: -14, anchor: 'courseStart', title: 'NDECC Email 6', description: '2 weeks before course starts' },
+        { offset: -7, anchor: 'courseStart', title: 'NDECC Email 7', description: '1 week before course starts' }
+      ],
+      socialMedia: [
+        { offset: -150, anchor: 'courseStart', title: 'NDECC Social Media Video 1', description: '5 months before course starts', format: 'Video' },
+        { offset: -120, anchor: 'courseStart', title: 'NDECC Social Media Video 2', description: '4 months before course starts', format: 'Video' },
+        { offset: -90, anchor: 'courseStart', title: 'NDECC Social Media Video 3', description: '3 months before course starts', format: 'Video' },
+        { offset: -60, anchor: 'courseStart', title: 'NDECC Social Media Video 4', description: '2 months before course starts', format: 'Video' },
+        { offset: -45, anchor: 'courseStart', title: 'NDECC Social Media Video 5', description: '1.5 months before course starts', format: 'Video' },
+        { offset: -30, anchor: 'courseStart', title: 'NDECC Social Media Video 6', description: '1 month before course starts', format: 'Video' },
+        { offset: -14, anchor: 'courseStart', title: 'NDECC Social Media Video 7', description: '2 weeks before course starts', format: 'Video' }
+      ],
+      stories: [
+        { offset: -90, anchor: 'courseStart', title: 'NDECC Story 1', description: '3 months before course starts', format: 'Story' },
+        { offset: -45, anchor: 'courseStart', title: 'NDECC Story 2', description: '1.5 months before course starts', format: 'Story' }
+      ],
+      ads: [
+        { offset: -120, anchor: 'courseStart', title: 'NDECC Social Media Ad 1', description: '4 months before - Runs 2 months', duration: 60, format: 'Ad' },
+        { offset: -60, anchor: 'courseStart', title: 'NDECC Social Media Ad 2', description: '2 months before - Runs Until Course Start', duration: 60, format: 'Ad' }
+      ]
+    },
+    'OSCE': {
+      name: 'OSCE Marketing Schedule',
+      emails: [
+        { offset: -180, anchor: 'examDate', title: 'OSCE Email 1 (CA)', description: '6 months before exam' },
+        { offset: -150, anchor: 'examDate', title: 'OSCE Email 2 (CA)', description: '5 months before exam' },
+        { offset: -120, anchor: 'examDate', title: 'OSCE Email 3 (CA)', description: '4 months before exam' },
+        { offset: -90, anchor: 'examDate', title: 'OSCE Email 4 (CA)', description: '3 months before exam' },
+        { offset: -60, anchor: 'examDate', title: 'OSCE Email 5 (CA)', description: '2 months before exam' },
+        { offset: -180, anchor: 'examDate', title: 'OSCE Email 1 (AU)', description: '6 months before exam (AU)' },
+        { offset: -150, anchor: 'examDate', title: 'OSCE Email 2 (AU)', description: '5 months before exam (AU)' },
+        { offset: -120, anchor: 'examDate', title: 'OSCE Email 3 (AU)', description: '4 months before exam (AU)' },
+        { offset: -90, anchor: 'examDate', title: 'OSCE Email 4 (AU)', description: '3 months before exam (AU)' },
+        { offset: -60, anchor: 'examDate', title: 'OSCE Email 5 (AU)', description: '2 months before exam (AU)' }
+      ],
+      socialMedia: [
+        { offset: -180, anchor: 'examDate', title: 'OSCE Social Media Video 1 (CA)', description: '6 months before exam', format: 'Video' },
+        { offset: -150, anchor: 'examDate', title: 'OSCE Social Media Video 2 (CA)', description: '5 months before exam', format: 'Video' },
+        { offset: -120, anchor: 'examDate', title: 'OSCE Social Media Video 3 (CA)', description: '4 months before exam', format: 'Video' },
+        { offset: -105, anchor: 'examDate', title: 'OSCE Social Media Video 4 (CA)', description: '3.5 months before exam', format: 'Video' },
+        { offset: -90, anchor: 'examDate', title: 'OSCE Social Media Video 5 (CA)', description: '3 months before exam', format: 'Video' },
+        { offset: -75, anchor: 'examDate', title: 'OSCE Social Media Video 6 (CA)', description: '2.5 months before exam', format: 'Video' },
+        { offset: -180, anchor: 'examDate', title: 'OSCE Social Media Video 1 (AU)', description: '6 months before exam (AU)', format: 'Video' },
+        { offset: -150, anchor: 'examDate', title: 'OSCE Social Media Video 2 (AU)', description: '5 months before exam (AU)', format: 'Video' },
+        { offset: -120, anchor: 'examDate', title: 'OSCE Social Media Video 3 (AU)', description: '4 months before exam (AU)', format: 'Video' },
+        { offset: -105, anchor: 'examDate', title: 'OSCE Social Media Video 4 (AU)', description: '3.5 months before exam (AU)', format: 'Video' },
+        { offset: -90, anchor: 'examDate', title: 'OSCE Social Media Video 5 (AU)', description: '3 months before exam (AU)', format: 'Video' },
+        { offset: -75, anchor: 'examDate', title: 'OSCE Social Media Video 6 (AU)', description: '2.5 months before exam (AU)', format: 'Video' },
+        { offset: -60, anchor: 'examDate', title: 'OSCE Social Media Video 7', description: '2 months before exam', format: 'Video' }
+      ],
+      stories: [],
+      ads: [
+        { offset: -150, anchor: 'examDate', title: 'OSCE Social Media Ad (CA)', description: '5 months before - Runs Until Exam', duration: 150, format: 'Ad' },
+        { offset: -150, anchor: 'examDate', title: 'OSCE Social Media Ad (AU)', description: '5 months before - Runs Until Exam (AU)', duration: 150, format: 'Ad' }
+      ]
+    },
+    'CE_MULTI': {
+      name: 'ALL CE Marketing Schedule',
+      emails: [
+        { offset: -90, anchor: 'courseStart', title: 'ALL CE Email 1', description: '3 months before course starts' },
+        { offset: -60, anchor: 'courseStart', title: 'ALL CE Email 2', description: '2 months before course starts' },
+        { offset: -30, anchor: 'courseStart', title: 'ALL CE Email 3', description: '1 month before course starts' },
+        { offset: -14, anchor: 'courseStart', title: 'ALL CE Email 4', description: '2 weeks before course starts' },
+        { offset: -7, anchor: 'courseStart', title: 'ALL CE Email 5', description: '1 week before course starts' }
+      ],
+      socialMedia: [
+        { offset: -90, anchor: 'courseStart', title: 'ALL CE Social Media Video 1', description: '3 months before course starts', format: 'Video' },
+        { offset: -60, anchor: 'courseStart', title: 'ALL CE Social Media Video 2', description: '2 months before course starts', format: 'Video' },
+        { offset: -30, anchor: 'courseStart', title: 'ALL CE Social Media Video 3', description: '1 month before course starts', format: 'Video' },
+        { offset: -14, anchor: 'courseStart', title: 'ALL CE Social Media Video 4', description: '2 weeks before course starts', format: 'Video' }
+      ],
+      stories: [
+        { offset: -45, anchor: 'courseStart', title: 'ALL CE Story', description: '1.5 months before course starts', format: 'Story' }
+      ],
+      ads: [
+        { offset: -60, anchor: 'courseStart', title: 'ALL CE Social Media Ad', description: '2 months before - Runs Until Course Start', duration: 60, format: 'Ad' }
+      ]
+    },
+    'ADAT_CA': {
+      name: 'ADAT Marketing Schedule',
+      emails: [
+        { offset: -90, anchor: 'examDate', title: 'ADAT Email 1', description: '3 months before exam' },
+        { offset: -60, anchor: 'examDate', title: 'ADAT Email 2', description: '2 months before exam' },
+        { offset: -30, anchor: 'examDate', title: 'ADAT Email 3', description: '1 month before exam' },
+        { offset: -14, anchor: 'examDate', title: 'ADAT Email 4', description: '2 weeks before exam' }
+      ],
+      socialMedia: [
+        { offset: -90, anchor: 'examDate', title: 'ADAT Social Media Video 1', description: '3 months before exam', format: 'Video' },
+        { offset: -75, anchor: 'examDate', title: 'ADAT Social Media Video 2', description: '2.5 months before exam', format: 'Video' },
+        { offset: -60, anchor: 'examDate', title: 'ADAT Social Media Video 3', description: '2 months before exam', format: 'Video' },
+        { offset: -45, anchor: 'examDate', title: 'ADAT Social Media Video 4', description: '1.5 months before exam', format: 'Video' },
+        { offset: -30, anchor: 'examDate', title: 'ADAT Social Media Video 5', description: '1 month before exam', format: 'Video' },
+        { offset: -14, anchor: 'examDate', title: 'ADAT Social Media Video 6', description: '2 weeks before exam', format: 'Video' }
+      ],
+      stories: [],
+      ads: []
+    },
+    'ADAT_US': {
+      name: 'ADAT (USA) Marketing Schedule',
+      emails: [
+        { offset: -90, anchor: 'examDate', title: 'ADAT USA Email 1', description: '3 months before exam' },
+        { offset: -60, anchor: 'examDate', title: 'ADAT USA Email 2', description: '2 months before exam' },
+        { offset: -30, anchor: 'examDate', title: 'ADAT USA Email 3', description: '1 month before exam' },
+        { offset: -14, anchor: 'examDate', title: 'ADAT USA Email 4', description: '2 weeks before exam' }
+      ],
+      socialMedia: [
+        { offset: -90, anchor: 'examDate', title: 'ADAT USA Social Media Video 1', description: '3 months before exam', format: 'Video' },
+        { offset: -75, anchor: 'examDate', title: 'ADAT USA Social Media Video 2', description: '2.5 months before exam', format: 'Video' },
+        { offset: -60, anchor: 'examDate', title: 'ADAT USA Social Media Video 3', description: '2 months before exam', format: 'Video' },
+        { offset: -45, anchor: 'examDate', title: 'ADAT USA Social Media Video 4', description: '1.5 months before exam', format: 'Video' },
+        { offset: -30, anchor: 'examDate', title: 'ADAT USA Social Media Video 5', description: '1 month before exam', format: 'Video' },
+        { offset: -14, anchor: 'examDate', title: 'ADAT USA Social Media Video 6', description: '2 weeks before exam', format: 'Video' }
+      ],
+      stories: [],
+      ads: []
+    },
+    'INBDE_US': {
+      name: 'INBDE Marketing Schedule',
+      emails: [
+        { offset: -90, anchor: 'examDate', title: 'INBDE Email 1', description: '3 months before exam' },
+        { offset: -60, anchor: 'examDate', title: 'INBDE Email 2', description: '2 months before exam' },
+        { offset: -30, anchor: 'examDate', title: 'INBDE Email 3', description: '1 month before exam' },
+        { offset: -14, anchor: 'examDate', title: 'INBDE Email 4', description: '2 weeks before exam' }
+      ],
+      socialMedia: [
+        { offset: -90, anchor: 'examDate', title: 'INBDE Social Media Video 1', description: '3 months before exam', format: 'Video' },
+        { offset: -75, anchor: 'examDate', title: 'INBDE Social Media Video 2', description: '2.5 months before exam', format: 'Video' },
+        { offset: -60, anchor: 'examDate', title: 'INBDE Social Media Video 3', description: '2 months before exam', format: 'Video' },
+        { offset: -45, anchor: 'examDate', title: 'INBDE Social Media Video 4', description: '1.5 months before exam', format: 'Video' },
+        { offset: -30, anchor: 'examDate', title: 'INBDE Social Media Video 5', description: '1 month before exam', format: 'Video' },
+        { offset: -14, anchor: 'examDate', title: 'INBDE Social Media Video 6', description: '2 weeks before exam', format: 'Video' }
+      ],
+      stories: [],
+      ads: []
+    }
+  };
+
+  /* ========== Client Journey Phases ========== */
+  const CLIENT_JOURNEY = {
+    sales: [
+      {
+        name: 'Lead Capture',
+        icon: '🎯',
+        tasks: ['Website form submission', 'Social media inquiry', 'Referral entry', 'Event sign-up']
+      },
+      {
+        name: 'Initial Contact',
+        icon: '📞',
+        tasks: ['Welcome call/email', 'Needs assessment', 'Course recommendation', 'Pricing discussion']
+      },
+      {
+        name: 'Qualification',
+        icon: '✓',
+        tasks: ['Document verification', 'Eligibility check', 'Payment plan options', 'Registration assistance']
+      },
+      {
+        name: 'Conversion',
+        icon: '💳',
+        tasks: ['Payment processing', 'Enrollment confirmation', 'Welcome packet', 'Onboarding schedule']
+      }
+    ],
+    operations: [
+      {
+        name: 'Onboarding',
+        icon: '🚀',
+        tasks: ['Account setup', 'Platform access', 'Orientation session', 'Resource distribution']
+      },
+      {
+        name: 'Course Delivery',
+        icon: '📚',
+        tasks: ['Live sessions', 'Study materials', 'Practice exams', 'Progress tracking']
+      },
+      {
+        name: 'Support',
+        icon: '🤝',
+        tasks: ['Technical support', 'Academic guidance', 'Schedule adjustments', 'Additional resources']
+      },
+      {
+        name: 'Completion',
+        icon: '🎓',
+        tasks: ['Final assessment', 'Certificate issuance', 'Feedback collection', 'Alumni network']
+      },
+      {
+        name: 'Follow-up',
+        icon: '🔄',
+        tasks: ['Exam results', 'Success stories', 'Referral program', 'Additional courses']
+      }
+    ]
+  };
+
+  /* ========== Create Reset Calendar Modal ========== */
+  function createResetModal() {
+    if (document.getElementById('resetModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'resetModal';
+    modal.innerHTML = `
+      <div class="dialog" style="max-width: 500px;">
+        <div class="hd">
+          <div style="font-weight:800; color: #DC2626;">⚠️ Reset Schedule</div>
+          <button class="btn" data-close="resetModal">✕</button>
+        </div>
+        <div class="bd">
+          <div class="warning-box">
+            <div class="warning-icon">⚠️</div>
+            <p class="warning-text">This will permanently delete ALL tasks from the current year (${selectedYear}). This action cannot be undone!</p>
+          </div>
+          <div class="form-section">
+            <div class="fs-title" style="margin-bottom: 12px;">What will be deleted:</div>
+            <ul style="margin: 0; padding-left: 20px; color: #64748B;">
+              <li>All generated tasks</li>
+              <li>All manual tasks</li>
+              <li>All schedule items</li>
+              <li>Course configurations (dates, cycles) will be preserved</li>
+            </ul>
+          </div>
+          <div class="field" style="margin-top: 16px;">
+            <label style="font-weight: 700; color: #DC2626;">Type "RESET" to confirm:</label>
+            <input type="text" id="resetConfirmInput" placeholder="Type RESET here..." style="width: 100%; margin-top: 8px;">
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn" data-close="resetModal">Cancel</button>
+          <button class="btn danger" id="confirmResetBtn" disabled>Reset All Tasks</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="resetModal"]').onclick = () => hideModal('resetModal');
+    modal.querySelector('.ft [data-close="resetModal"]').onclick = () => hideModal('resetModal');
+
+    // Enable button only when user types RESET
+    const confirmInput = modal.querySelector('#resetConfirmInput');
+    const confirmBtn = modal.querySelector('#confirmResetBtn');
+
+    confirmInput.oninput = function() {
+      confirmBtn.disabled = confirmInput.value.trim().toUpperCase() !== 'RESET';
+    };
+
+    confirmBtn.onclick = function() {
+      if (confirmInput.value.trim().toUpperCase() !== 'RESET') return;
+
+      // Clear all events for the current year
+      const y = yearData();
+      y.events = [];
+
+      // Reset dirty tracking
+      if (typeof DirtyCourses !== 'undefined') {
+        DirtyCourses.set(String(selectedYear), new Set());
+      }
+
+      // Save changes
+      scheduleAutosave();
+      commitSave('manual');
+
+      hideModal('resetModal');
+      refreshAllViews({ animate: true });
+      showToast('All tasks have been reset');
+    };
+  }
+  createResetModal();
+
+  /* ========== Create Marketing Templates Modal ========== */
+  function createMarketingTemplatesModal() {
+    if (document.getElementById('marketingTemplatesModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'marketingTemplatesModal';
+    modal.innerHTML = `
+      <div class="dialog" style="max-width: 900px;">
+        <div class="hd">
+          <div style="font-weight:800;">📢 Marketing Schedule Templates</div>
+          <button class="btn" data-close="marketingTemplatesModal">✕</button>
+        </div>
+        <div class="bd">
+          <p class="muted" style="margin-bottom: 16px;">Select a course to view and apply its marketing schedule template. Templates include emails, social media, stories, and ads timed relative to course/exam dates.</p>
+          <div class="marketing-template-grid" id="marketingTemplateGrid"></div>
+          <div id="templatePreview" style="margin-top: 20px; display: none;">
+            <div class="form-section">
+              <div class="fs-head">
+                <div class="fs-title" id="templatePreviewTitle">Template Preview</div>
+              </div>
+              <div id="templatePreviewContent" style="margin-top: 12px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn primary" id="applyTemplateBtn" disabled>Apply Template to Course</button>
+          <button class="btn" data-close="marketingTemplatesModal">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="marketingTemplatesModal"]').onclick = () => hideModal('marketingTemplatesModal');
+    modal.querySelector('.ft [data-close="marketingTemplatesModal"]').onclick = () => hideModal('marketingTemplatesModal');
+
+    // Render template cards
+    renderMarketingTemplateCards();
+  }
+
+  function renderMarketingTemplateCards() {
+    const grid = document.getElementById('marketingTemplateGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    Object.keys(MARKETING_TEMPLATES).forEach(courseId => {
+      const template = MARKETING_TEMPLATES[courseId];
+      const card = document.createElement('div');
+      card.className = 'marketing-template-card';
+      card.dataset.courseId = courseId;
+
+      const emailCount = template.emails?.length || 0;
+      const socialCount = template.socialMedia?.length || 0;
+      const storyCount = template.stories?.length || 0;
+      const adCount = template.ads?.length || 0;
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-icon">📋</div>
+          <div class="card-title">${template.name}</div>
+        </div>
+        <div class="card-stats">
+          ${emailCount ? `<span class="stat-pill email">📧 ${emailCount} Emails</span>` : ''}
+          ${socialCount ? `<span class="stat-pill social">📱 ${socialCount} Videos</span>` : ''}
+          ${storyCount ? `<span class="stat-pill story">📖 ${storyCount} Stories</span>` : ''}
+          ${adCount ? `<span class="stat-pill ad">📣 ${adCount} Ads</span>` : ''}
+        </div>
+      `;
+
+      card.onclick = function() {
+        // Toggle selection
+        grid.querySelectorAll('.marketing-template-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        // Show preview
+        showTemplatePreview(courseId, template);
+
+        // Enable apply button
+        document.getElementById('applyTemplateBtn').disabled = false;
+      };
+
+      grid.appendChild(card);
+    });
+  }
+
+  function showTemplatePreview(courseId, template) {
+    const preview = document.getElementById('templatePreview');
+    const title = document.getElementById('templatePreviewTitle');
+    const content = document.getElementById('templatePreviewContent');
+
+    if (!preview || !content) return;
+
+    preview.style.display = 'block';
+    title.textContent = template.name + ' Preview';
+
+    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">';
+
+    // Emails
+    if (template.emails?.length) {
+      html += `<div style="background: #EFF6FF; padding: 12px; border-radius: 10px;">
+        <div style="font-weight: 800; color: #1D4ED8; margin-bottom: 8px;">📧 Emails (${template.emails.length})</div>
+        <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #475569;">
+          ${template.emails.map(e => `<li>${e.title}</li>`).join('')}
+        </ul>
+      </div>`;
+    }
+
+    // Social Media
+    if (template.socialMedia?.length) {
+      html += `<div style="background: #F5F3FF; padding: 12px; border-radius: 10px;">
+        <div style="font-weight: 800; color: #7C3AED; margin-bottom: 8px;">📱 Social Videos (${template.socialMedia.length})</div>
+        <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #475569;">
+          ${template.socialMedia.slice(0, 5).map(e => `<li>${e.title}</li>`).join('')}
+          ${template.socialMedia.length > 5 ? `<li style="color: #7C3AED;">+ ${template.socialMedia.length - 5} more...</li>` : ''}
+        </ul>
+      </div>`;
+    }
+
+    // Stories
+    if (template.stories?.length) {
+      html += `<div style="background: #FDF4FF; padding: 12px; border-radius: 10px;">
+        <div style="font-weight: 800; color: #A21CAF; margin-bottom: 8px;">📖 Stories (${template.stories.length})</div>
+        <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #475569;">
+          ${template.stories.map(e => `<li>${e.title}</li>`).join('')}
+        </ul>
+      </div>`;
+    }
+
+    // Ads
+    if (template.ads?.length) {
+      html += `<div style="background: #FEF3C7; padding: 12px; border-radius: 10px;">
+        <div style="font-weight: 800; color: #B45309; margin-bottom: 8px;">📣 Ads (${template.ads.length})</div>
+        <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #475569;">
+          ${template.ads.map(e => `<li>${e.title}</li>`).join('')}
+        </ul>
+      </div>`;
+    }
+
+    html += '</div>';
+    content.innerHTML = html;
+  }
+
+  function applyMarketingTemplate(courseId) {
+    const template = MARKETING_TEMPLATES[courseId];
+    if (!template) {
+      showToast('Template not found');
+      return;
+    }
+
+    const y = yearData();
+    const cfg = ensureConfig(courseId);
+    if (!cfg.enabled) {
+      showToast('Please enable the course first');
+      return;
+    }
+
+    // Get course cycle data to calculate dates
+    const cycles = cfg.cycleData || [];
+    if (cycles.length === 0) {
+      showToast('Please add a course cycle with dates first');
+      return;
+    }
+
+    let tasksAdded = 0;
+
+    cycles.forEach((cycle, cycleIdx) => {
+      // Helper to get anchor date
+      function getAnchorDate(anchor) {
+        switch (anchor) {
+          case 'courseStart': return parseDate(cycle.courseStart);
+          case 'courseEnd': return parseDate(cycle.courseEnd);
+          case 'examDate': return parseDate(cycle.examDate);
+          case 'resultsDate': return parseDate(cycle.resultsDate);
+          default: return parseDate(cycle.courseStart);
+        }
+      }
+
+      // Create tasks from template
+      function createTasksFromItems(items, type) {
+        if (!items) return;
+        items.forEach(item => {
+          const anchorDate = getAnchorDate(item.anchor);
+          if (!anchorDate) return;
+
+          const taskDate = new Date(anchorDate);
+          taskDate.setDate(taskDate.getDate() + item.offset);
+
+          const ev = {
+            id: uid(),
+            date: ymd(taskDate),
+            title: item.title,
+            type: type,
+            format: item.format || '',
+            courseId: courseId,
+            courseName: courseLabel(courseId),
+            status: 'planned',
+            generated: true,
+            genSource: 'default',
+            cycleIndex: cycleIdx + 1,
+            notes: item.description || ''
+          };
+          y.events.push(ev);
+          tasksAdded++;
+        });
+      }
+
+      createTasksFromItems(template.emails, 'Email');
+      createTasksFromItems(template.socialMedia, 'Social');
+      createTasksFromItems(template.stories, 'Social');
+      createTasksFromItems(template.ads, 'Ad');
+    });
+
+    scheduleAutosave();
+    hideModal('marketingTemplatesModal');
+    refreshAllViews({ animate: true });
+    showToast(`Added ${tasksAdded} marketing tasks`);
+  }
+
+  createMarketingTemplatesModal();
+
+  // Apply button handler
+  setTimeout(() => {
+    const applyBtn = document.getElementById('applyTemplateBtn');
+    if (applyBtn) {
+      applyBtn.onclick = function() {
+        const selectedCard = document.querySelector('.marketing-template-card.selected');
+        if (selectedCard) {
+          applyMarketingTemplate(selectedCard.dataset.courseId);
+        }
+      };
+    }
+  }, 100);
+
+  /* ========== Create Client Journey Modal ========== */
+  function createClientJourneyModal() {
+    if (document.getElementById('clientJourneyModal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'clientJourneyModal';
+    modal.innerHTML = `
+      <div class="dialog" style="max-width: 1100px;">
+        <div class="hd">
+          <div style="font-weight:800;">🛤️ Client Journey</div>
+          <button class="btn" data-close="clientJourneyModal">✕</button>
+        </div>
+        <div class="bd">
+          <div class="client-journey-section" style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);">
+            <div class="section-title" style="color: #1E40AF;">
+              <span>💼</span> Sales Journey
+            </div>
+            <div class="journey-phases" id="salesJourneyPhases"></div>
+          </div>
+          <div class="client-journey-section" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border-color: #86EFAC;">
+            <div class="section-title" style="color: #166534;">
+              <span>⚙️</span> Operations Journey (Post-Sales)
+            </div>
+            <div class="journey-phases" id="opsJourneyPhases"></div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn primary" id="addJourneyTasksBtn">Add Journey Tasks to Schedule</button>
+          <button class="btn" data-close="clientJourneyModal">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-close="clientJourneyModal"]').onclick = () => hideModal('clientJourneyModal');
+    modal.querySelector('.ft [data-close="clientJourneyModal"]').onclick = () => hideModal('clientJourneyModal');
+
+    // Render journey phases
+    renderJourneyPhases();
+  }
+
+  function renderJourneyPhases() {
+    const salesContainer = document.getElementById('salesJourneyPhases');
+    const opsContainer = document.getElementById('opsJourneyPhases');
+
+    if (salesContainer) {
+      salesContainer.innerHTML = CLIENT_JOURNEY.sales.map(phase => `
+        <div class="journey-phase">
+          <div class="phase-icon sales">${phase.icon}</div>
+          <div class="phase-title">${phase.name}</div>
+          <ul class="phase-tasks">
+            ${phase.tasks.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+    }
+
+    if (opsContainer) {
+      opsContainer.innerHTML = CLIENT_JOURNEY.operations.map(phase => `
+        <div class="journey-phase">
+          <div class="phase-icon ops">${phase.icon}</div>
+          <div class="phase-title">${phase.name}</div>
+          <ul class="phase-tasks">
+            ${phase.tasks.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+    }
+  }
+
+  createClientJourneyModal();
+
+  /* ========== Add Quick Actions Bar ========== */
+  function addQuickActionsBar() {
+    const configHeader = document.querySelector('.config-header');
+    if (!configHeader) return;
+
+    const rightBtns = configHeader.querySelector('.right-btns');
+    if (!rightBtns) return;
+
+    // Check if buttons already exist
+    if (rightBtns.querySelector('#btnReset')) return;
+
+    // Add Reset button
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.id = 'btnReset';
+    resetBtn.innerHTML = '🔄 Reset';
+    resetBtn.onclick = () => showModal('resetModal');
+    rightBtns.appendChild(resetBtn);
+
+    // Add Marketing Templates button
+    const marketingBtn = document.createElement('button');
+    marketingBtn.className = 'btn box';
+    marketingBtn.id = 'btnMarketing';
+    marketingBtn.innerHTML = '📢 Marketing';
+    marketingBtn.onclick = () => {
+      renderMarketingTemplateCards();
+      showModal('marketingTemplatesModal');
+    };
+    rightBtns.insertBefore(marketingBtn, resetBtn);
+
+    // Add Client Journey button
+    const journeyBtn = document.createElement('button');
+    journeyBtn.className = 'btn box';
+    journeyBtn.id = 'btnJourney';
+    journeyBtn.innerHTML = '🛤️ Journey';
+    journeyBtn.onclick = () => {
+      renderJourneyPhases();
+      showModal('clientJourneyModal');
+    };
+    rightBtns.insertBefore(journeyBtn, marketingBtn);
+  }
+
+  /* ========== Feature Access Panel ========== */
+  function addFeatureAccessPanel() {
+    const calHeader = document.querySelector('.cal-header');
+    if (!calHeader || calHeader.querySelector('.feature-access-panel')) return;
+
+    const panel = document.createElement('div');
+    panel.className = 'feature-access-panel';
+    panel.innerHTML = `
+      <button class="feature-btn" id="featureResults" title="Manage course results">
+        <span class="icon">📊</span>
+        <span class="label">Results</span>
+      </button>
+      <button class="feature-btn" id="featureMarketing" title="Marketing schedule templates">
+        <span class="icon">📢</span>
+        <span class="label">Marketing</span>
+      </button>
+      <button class="feature-btn" id="featureJourney" title="Client journey workflow">
+        <span class="icon">🛤️</span>
+        <span class="label">Journey</span>
+      </button>
+      <button class="feature-btn" id="featureApproval" title="Approval workflow">
+        <span class="icon">✓</span>
+        <span class="label">Approvals</span>
+      </button>
+      <button class="feature-btn" id="featureSlots" title="Marketing slots calendar">
+        <span class="icon">📅</span>
+        <span class="label">Slots</span>
+      </button>
+      <button class="feature-btn" id="featureFilter" title="Advanced filters">
+        <span class="icon">🔍</span>
+        <span class="label">Filters</span>
+      </button>
+    `;
+
+    // Insert before the calendar
+    const calWrap = document.querySelector('.calendar-wrap');
+    if (calWrap) {
+      calWrap.parentNode.insertBefore(panel, calWrap);
+    }
+
+    // Add click handlers
+    setTimeout(() => {
+      const featureResults = document.getElementById('featureResults');
+      const featureMarketing = document.getElementById('featureMarketing');
+      const featureJourney = document.getElementById('featureJourney');
+      const featureApproval = document.getElementById('featureApproval');
+      const featureSlots = document.getElementById('featureSlots');
+      const featureFilter = document.getElementById('featureFilter');
+
+      if (featureResults) featureResults.onclick = () => showModal('resultsModal');
+      if (featureMarketing) featureMarketing.onclick = () => {
+        renderMarketingTemplateCards();
+        showModal('marketingTemplatesModal');
+      };
+      if (featureJourney) featureJourney.onclick = () => {
+        renderJourneyPhases();
+        showModal('clientJourneyModal');
+      };
+      if (featureApproval) featureApproval.onclick = () => showModal('approvalModal');
+      if (featureSlots) featureSlots.onclick = () => showModal('marketingSlotsModal');
+      if (featureFilter) featureFilter.onclick = () => showModal('filterModal');
+    }, 100);
+  }
+
+  /* ========== Add Journey Tasks to Schedule ========== */
+  setTimeout(() => {
+    const addJourneyBtn = document.getElementById('addJourneyTasksBtn');
+    if (addJourneyBtn) {
+      addJourneyBtn.onclick = function() {
+        const y = yearData();
+        const today = new Date();
+        let tasksAdded = 0;
+
+        // Add Sales journey tasks
+        CLIENT_JOURNEY.sales.forEach((phase, idx) => {
+          phase.tasks.forEach((task, taskIdx) => {
+            const taskDate = new Date(today);
+            taskDate.setDate(taskDate.getDate() + (idx * 7) + taskIdx);
+
+            const ev = {
+              id: uid(),
+              date: ymd(taskDate),
+              title: `[Sales] ${phase.name}: ${task}`,
+              type: 'Milestone',
+              courseId: 'Custom',
+              courseName: 'Client Journey',
+              status: 'planned',
+              generated: false,
+              genSource: 'one',
+              viewScope: 'team',
+              notes: `Sales phase: ${phase.name}`
+            };
+            y.events.push(ev);
+            tasksAdded++;
+          });
+        });
+
+        // Add Operations journey tasks
+        CLIENT_JOURNEY.operations.forEach((phase, idx) => {
+          phase.tasks.forEach((task, taskIdx) => {
+            const taskDate = new Date(today);
+            taskDate.setDate(taskDate.getDate() + 30 + (idx * 7) + taskIdx);
+
+            const ev = {
+              id: uid(),
+              date: ymd(taskDate),
+              title: `[Ops] ${phase.name}: ${task}`,
+              type: 'Milestone',
+              courseId: 'Custom',
+              courseName: 'Client Journey',
+              status: 'planned',
+              generated: false,
+              genSource: 'one',
+              viewScope: 'team',
+              notes: `Operations phase: ${phase.name}`
+            };
+            y.events.push(ev);
+            tasksAdded++;
+          });
+        });
+
+        scheduleAutosave();
+        hideModal('clientJourneyModal');
+        refreshAllViews({ animate: true });
+        showToast(`Added ${tasksAdded} journey tasks`);
+      };
+    }
+  }, 200);
+
+  /* ========== Initialize ========== */
+  setTimeout(() => {
+    addQuickActionsBar();
+    addFeatureAccessPanel();
+  }, 200);
+
+  // Re-add on view changes
+  const origRenderCalendar = window.renderCalendar;
+  if (typeof origRenderCalendar === 'function' && !origRenderCalendar.__v30Patched) {
+    window.renderCalendar = function() {
+      origRenderCalendar.apply(this, arguments);
+      setTimeout(addFeatureAccessPanel, 50);
+    };
+    window.renderCalendar.__v30Patched = true;
+  }
+
+  // Expose for global access
+  window.MARKETING_TEMPLATES = MARKETING_TEMPLATES;
+  window.CLIENT_JOURNEY = CLIENT_JOURNEY;
+
+})();
+</script>
+
 </body>
 </html>
